@@ -7,35 +7,51 @@ type Item = { id:string; name:string; category:string; cost:number; weight:numbe
 
 const BASE_BARS: Bars = { water: 60, food: 60, health: 60, morale: 60 }
 
-// Enforce MSS-only taxonomy (visible order)
+// === Canonical MSS categories (fixed order) ===
 const ALLOWED_CATEGORIES = [
   'Water',
   'Food',
+  'Clothing',
   'Shelter',
-  'Health & Sanitation',
-  'Comms & Navigation',
-  'Sustainability & Tools'
+  'Communications & Navigation',
+  'Health',
+  'Sustainability',
+  'Special Considerations'
 ] as const
 
 type Cat = typeof ALLOWED_CATEGORIES[number]
 
-// Map legacy categories → MSS buckets
+// Legacy → Canon remap (do not alter canon list above)
 const REMAP: Record<string, Cat> = {
   'Water': 'Water',
   'Food': 'Food',
+  'Clothing': 'Clothing',
+  'Apparel': 'Clothing',
   'Shelter': 'Shelter',
-  'Health': 'Health & Sanitation',
-  'Sanitation': 'Health & Sanitation',
-  'Comms & Nav': 'Comms & Navigation',
-  'Comms & Navigation': 'Comms & Navigation',
-  'Lighting': 'Sustainability & Tools',
-  'Sustainability': 'Sustainability & Tools',
-  'Tools': 'Sustainability & Tools'
+  'Comms & Nav': 'Communications & Navigation',
+  'Comms & Navigation': 'Communications & Navigation',
+  'Communications & Navigation': 'Communications & Navigation',
+  'Health': 'Health',
+  'Sanitation': 'Health',
+  'Health & Sanitation': 'Health',
+  'Lighting': 'Sustainability',
+  'Power': 'Sustainability',
+  'Energy': 'Sustainability',
+  'Tools': 'Sustainability',
+  'Sustainability': 'Sustainability',
+  'Docs': 'Special Considerations',
+  'Documentation': 'Special Considerations',
+  'Documentation & Cash': 'Special Considerations',
+  'Finance': 'Special Considerations',
+  'Cash': 'Special Considerations',
+  'Pets': 'Special Considerations',
+  'Pet Care': 'Special Considerations',
+  'Special Considerations': 'Special Considerations'
 }
 
 function normalizeItems(items: Item[]): (Item & {category: Cat})[] {
   return items.map(it => {
-    const cat = REMAP[it.category] ?? 'Sustainability & Tools'
+    const cat = REMAP[it.category] ?? 'Sustainability'
     return {...it, category: cat}
   })
 }
@@ -61,7 +77,7 @@ export default function StoreScreen({
 }){
   const items = useMemo<Item[]>(()=> normalizeItems(rawItems as any), [])
   const startingBudget = persona==='EC' ? 300 : 150
-  const capacity = persona==='EC' ? 25 : 30 // lbs
+  const capacity = persona==='EC' ? 25 : 30 // lbs (gender variants can override later)
 
   const [qty, setQty] = useState<Record<string, number>>({})
   const [spent, setSpent] = useState(0)

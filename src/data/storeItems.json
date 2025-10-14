@@ -10,6 +10,17 @@
     }
   },
   {
+    "id": "water_pur_tabs",
+    "name": "Purification Tabs (10x)",
+    "category": "Water",
+    "cost": 6,
+    "weight": 0.1,
+    "effects": {
+      "water": 6,
+      "morale": 1
+    }
+  },
+  {
     "id": "mre",
     "name": "MRE (Meal, Ready-to-Eat)",
     "category": "Food",
@@ -28,6 +39,48 @@
     "effects": {
       "food": 10,
       "morale": 1
+    }
+  },
+  {
+    "id": "clothes_change",
+    "name": "Change of Clothes (base layer, shirt, pants)",
+    "category": "Clothing",
+    "cost": 35,
+    "weight": 2.5,
+    "effects": {
+      "morale": 3
+    }
+  },
+  {
+    "id": "socks_spare",
+    "name": "Spare Socks (2 pairs)",
+    "category": "Clothing",
+    "cost": 8,
+    "weight": 0.4,
+    "effects": {
+      "health": 1,
+      "morale": 1
+    }
+  },
+  {
+    "id": "jacket_wp",
+    "name": "Waterproof Jacket",
+    "category": "Clothing",
+    "cost": 40,
+    "weight": 1.2,
+    "effects": {
+      "health": 2,
+      "morale": 2
+    }
+  },
+  {
+    "id": "boots_hiking",
+    "name": "Hiking Boots (ankle support)",
+    "category": "Clothing",
+    "cost": 60,
+    "weight": 3.0,
+    "effects": {
+      "health": 3
     }
   },
   {
@@ -63,9 +116,39 @@
     }
   },
   {
+    "id": "radio_am_fm_wb",
+    "name": "Radio (AM/FM/WB)",
+    "category": "Communications & Navigation",
+    "cost": 30,
+    "weight": 0.8,
+    "effects": {
+      "morale": 4
+    }
+  },
+  {
+    "id": "map_local",
+    "name": "Paper Map (Local)",
+    "category": "Communications & Navigation",
+    "cost": 6,
+    "weight": 0.2,
+    "effects": {
+      "morale": 1
+    }
+  },
+  {
+    "id": "signal_mirror",
+    "name": "Signal Mirror / Whistle",
+    "category": "Communications & Navigation",
+    "cost": 7,
+    "weight": 0.2,
+    "effects": {
+      "morale": 1
+    }
+  },
+  {
     "id": "first_aid_kit",
     "name": "First Aid Kit (basic)",
-    "category": "Health & Sanitation",
+    "category": "Health",
     "cost": 25,
     "weight": 1.0,
     "effects": {
@@ -75,7 +158,7 @@
   {
     "id": "n95_goggles",
     "name": "N95 Masks + Safety Goggles",
-    "category": "Health & Sanitation",
+    "category": "Health",
     "cost": 18,
     "weight": 0.5,
     "effects": {
@@ -85,7 +168,7 @@
   {
     "id": "wet_wipes_soap",
     "name": "Wet Wipes + Soap",
-    "category": "Health & Sanitation",
+    "category": "Health",
     "cost": 12,
     "weight": 0.9,
     "effects": {
@@ -96,7 +179,7 @@
   {
     "id": "toilet_paper",
     "name": "Toilet Paper (compact)",
-    "category": "Health & Sanitation",
+    "category": "Health",
     "cost": 4,
     "weight": 0.5,
     "effects": {
@@ -104,29 +187,9 @@
     }
   },
   {
-    "id": "radio_am_fm_wb",
-    "name": "Radio (AM/FM/WB)",
-    "category": "Comms & Navigation",
-    "cost": 30,
-    "weight": 0.8,
-    "effects": {
-      "morale": 4
-    }
-  },
-  {
-    "id": "map_local",
-    "name": "Paper Map (Local)",
-    "category": "Comms & Navigation",
-    "cost": 6,
-    "weight": 0.2,
-    "effects": {
-      "morale": 1
-    }
-  },
-  {
-    "id": "flashlight_headlamp",
+    "id": "headlamp_batt",
     "name": "Headlamp + Batteries",
-    "category": "Sustainability & Tools",
+    "category": "Sustainability",
     "cost": 15,
     "weight": 0.8,
     "effects": {
@@ -136,7 +199,7 @@
   {
     "id": "lighter_firesteel",
     "name": "Lighter + Firesteel",
-    "category": "Sustainability & Tools",
+    "category": "Sustainability",
     "cost": 8,
     "weight": 0.2,
     "effects": {
@@ -146,11 +209,82 @@
   {
     "id": "work_gloves",
     "name": "Work Gloves",
-    "category": "Sustainability & Tools",
+    "category": "Sustainability",
     "cost": 10,
     "weight": 0.6,
     "effects": {
       "health": 2
+    }
+  },
+  {
+    "id": "mess_kit",
+    "name": "Mess Kit (bowl/spoon/cup)",
+    "category": "Sustainability",
+    "cost": 14,
+    "weight": 0.9,
+    "effects": {
+      "morale": 1
+    }
+  },
+  {
+    "id": "can_opener",
+    "name": "Can Opener (compact)",
+    "category": "Sustainability",
+    "cost": 5,
+    "weight": 0.2,
+    "effects": {
+      "morale": 1
+    }
+  },
+  {
+    "id": "doc_packet",
+    "name": "Special: Document Packet (IDs/Insurance/Deeds)",
+    "category": "Special Considerations",
+    "cost": 0,
+    "weight": 0.5,
+    "effects": {
+      "morale": 1
+    }
+  },
+  {
+    "id": "cash_small",
+    "name": "Special: Cash \u2014 Small Bills ($300)",
+    "category": "Special Considerations",
+    "cost": 300,
+    "weight": 0.2,
+    "effects": {
+      "morale": 2
+    }
+  },
+  {
+    "id": "pet_food_3day",
+    "name": "Special: Pet Food (3\u2011day supply)",
+    "category": "Special Considerations",
+    "cost": 12,
+    "weight": 2.0,
+    "effects": {
+      "morale": 2
+    }
+  },
+  {
+    "id": "pet_bowl_leash",
+    "name": "Special: Collapsible Bowl + Leash",
+    "category": "Special Considerations",
+    "cost": 10,
+    "weight": 0.6,
+    "effects": {
+      "health": 1,
+      "morale": 1
+    }
+  },
+  {
+    "id": "spare_glasses",
+    "name": "Special: Spare Glasses (reading)",
+    "category": "Special Considerations",
+    "cost": 25,
+    "weight": 0.2,
+    "effects": {
+      "morale": 1
     }
   }
 ]
