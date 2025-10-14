@@ -1,0 +1,57 @@
+[
+  {
+    "id": "rest",
+    "name": "Rest",
+    "desc": "Recover a bit, consume minimal rations.",
+    "effects": {
+      "health": 5,
+      "morale": 2,
+      "food": -5,
+      "water": -5
+    }
+  },
+  {
+    "id": "move",
+    "name": "Move",
+    "desc": "Press onward at standard pace.",
+    "effects": {
+      "health": -5,
+      "morale": 1,
+      "food": -8,
+      "water": -10
+    }
+  },
+  {
+    "id": "move_fast",
+    "name": "Move Fast",
+    "desc": "Cover more ground with higher exertion.",
+    "effects": {
+      "health": -10,
+      "morale": 2,
+      "food": -12,
+      "water": -15
+    }
+  },
+  {
+    "id": "ration",
+    "name": "Ration",
+    "desc": "Conserve food and water this cycle.",
+    "effects": {
+      "health": -3,
+      "morale": -4,
+      "food": 2,
+      "water": 2
+    }
+  },
+  {
+    "id": "make_camp",
+    "name": "Make Camp",
+    "desc": "Stabilize morale and health if you have shelter.",
+    "effects": {
+      "health": 3,
+      "morale": 6,
+      "food": -6,
+      "water": -6
+    }
+  }
+]
