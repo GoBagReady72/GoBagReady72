@@ -15,6 +15,7 @@ export default function App(){
   const [persona,setPersona] = useState<'EC'|'PR'>('EC')
   const [startingBars, setStartingBars] = useState<Bars|undefined>(undefined)
   const [carryPenalty, setCarryPenalty] = useState<number>(0)
+  const [cart, setCart] = useState<{id:string; qty:number}[]>([])
 
   const to = (s:Screen)=>()=>setScreen(s)
 
@@ -28,11 +29,20 @@ export default function App(){
         {screen==='title' && <TitleScreen onNext={(p)=>{setPersona(p); setScreen('brief')}} />}
         {screen==='brief' && <BriefingScreen seed={seed} onNext={()=>setScreen('store')} onBack={to('title')} />}
         {screen==='store' && <StoreScreen persona={persona} onBack={to('brief')} onComplete={(payload)=>{
-          setStartingBars(payload.startingBars); setCarryPenalty(payload.carryPenalty); setScreen('sim')
+          setCart(payload.cart);
+          setStartingBars(payload.startingBars);
+          setCarryPenalty(payload.carryPenalty);
+          setScreen('sim')
         }} />}
         {screen==='sim' && <SimulationScreen persona={persona} seed={seed} startingBars={startingBars} carryPenalty={carryPenalty}
-          onDone={(r)=>{setResult(r); setScreen('debrief')}} onBack={to('store')} />}
-        {screen==='debrief' && <DebriefScreen result={result} onRestart={()=>{setSeed(Math.floor(Math.random()*1e9)); setStartingBars(undefined); setCarryPenalty(0); setScreen('title')}} />}
+          onDone={(r)=>{ setResult({...r, cart}); setScreen('debrief') }} onBack={to('store')} />}
+        {screen==='debrief' && <DebriefScreen result={result} onRestart={()=>{
+            setSeed(Math.floor(Math.random()*1e9));
+            setStartingBars(undefined);
+            setCarryPenalty(0);
+            setCart([]);
+            setScreen('title')
+          }} />}
       </div>
       <footer>© GoBag: Ready72 — Powered by HazMSS360 • MVP prototype</footer>
     </div>

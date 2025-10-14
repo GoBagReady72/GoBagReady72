@@ -26,9 +26,8 @@ export default function StoreScreen({
   })=>void;
   persona?: 'EC'|'PR';
 }){
-  // Persona economics & capacity
   const startingBudget = persona==='EC' ? 300 : 150
-  const capacity = persona==='EC' ? 25 : 30 // lbs; tweak later with gender variants
+  const capacity = persona==='EC' ? 25 : 30 // lbs
 
   const items = useMemo<Item[]>(()=> (storeItems as any) as Item[], [])
   const [qty, setQty] = useState<Record<string, number>>({})
@@ -62,7 +61,6 @@ export default function StoreScreen({
   const carryPenalty = Math.max(0, Math.min(3, weight > capacity ? (1 + Math.floor((weight - capacity)/5)) : 0))
 
   function inc(id:string, cost:number){
-    // Prevent going over budget by more than one step (so UX feels responsive)
     if (budgetLeft - cost < -0.0001) return
     setQty(prev => ({...prev, [id]: (prev[id] ?? 0) + 1}))
   }
