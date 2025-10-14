@@ -1,0 +1,156 @@
+[
+  {
+    "id": "water_pouch_1l",
+    "name": "Water Pouch (1L)",
+    "category": "Water",
+    "cost": 5,
+    "weight": 2.2,
+    "effects": {
+      "water": 10
+    }
+  },
+  {
+    "id": "mre",
+    "name": "MRE (Meal, Ready-to-Eat)",
+    "category": "Food",
+    "cost": 12,
+    "weight": 1.5,
+    "effects": {
+      "food": 8
+    }
+  },
+  {
+    "id": "food_bar_2400",
+    "name": "Emergency Food Bar (2400 kcal)",
+    "category": "Food",
+    "cost": 10,
+    "weight": 1.4,
+    "effects": {
+      "food": 10,
+      "morale": 1
+    }
+  },
+  {
+    "id": "tent_2p",
+    "name": "Tent (2\u2011Person, rainfly)",
+    "category": "Shelter",
+    "cost": 70,
+    "weight": 5.0,
+    "effects": {
+      "health": 5,
+      "morale": 10
+    }
+  },
+  {
+    "id": "sleeping_bag_3s",
+    "name": "Sleeping Bag (3\u2011season)",
+    "category": "Shelter",
+    "cost": 45,
+    "weight": 3.0,
+    "effects": {
+      "health": 4,
+      "morale": 6
+    }
+  },
+  {
+    "id": "ground_pad",
+    "name": "Ground Pad",
+    "category": "Shelter",
+    "cost": 20,
+    "weight": 1.0,
+    "effects": {
+      "morale": 4
+    }
+  },
+  {
+    "id": "first_aid_kit",
+    "name": "First Aid Kit (basic)",
+    "category": "Health",
+    "cost": 25,
+    "weight": 1.0,
+    "effects": {
+      "health": 8
+    }
+  },
+  {
+    "id": "n95_goggles",
+    "name": "N95 Masks + Safety Goggles",
+    "category": "Health",
+    "cost": 18,
+    "weight": 0.5,
+    "effects": {
+      "health": 6
+    }
+  },
+  {
+    "id": "radio_am_fm_wb",
+    "name": "Radio (AM/FM/WB)",
+    "category": "Comms & Nav",
+    "cost": 30,
+    "weight": 0.8,
+    "effects": {
+      "morale": 4
+    }
+  },
+  {
+    "id": "flashlight_headlamp",
+    "name": "Headlamp + Batteries",
+    "category": "Lighting",
+    "cost": 15,
+    "weight": 0.8,
+    "effects": {
+      "morale": 2
+    }
+  },
+  {
+    "id": "lighter_firesteel",
+    "name": "Lighter + Firesteel",
+    "category": "Sustainability",
+    "cost": 8,
+    "weight": 0.2,
+    "effects": {
+      "morale": 2
+    }
+  },
+  {
+    "id": "work_gloves",
+    "name": "Work Gloves",
+    "category": "Sustainability",
+    "cost": 10,
+    "weight": 0.6,
+    "effects": {
+      "health": 2
+    }
+  },
+  {
+    "id": "wet_wipes_soap",
+    "name": "Wet Wipes + Soap",
+    "category": "Sanitation",
+    "cost": 12,
+    "weight": 0.9,
+    "effects": {
+      "health": 3,
+      "morale": 1
+    }
+  },
+  {
+    "id": "toilet_paper",
+    "name": "Toilet Paper (compact)",
+    "category": "Sanitation",
+    "cost": 4,
+    "weight": 0.5,
+    "effects": {
+      "morale": 2
+    }
+  },
+  {
+    "id": "map_local",
+    "name": "Paper Map (Local)",
+    "category": "Comms & Nav",
+    "cost": 6,
+    "weight": 0.2,
+    "effects": {
+      "morale": 1
+    }
+  }
+]

@@ -19,24 +19,31 @@ function applyEffects(bars:Bars, effects:Record<string,number>):Bars{
   return next
 }
 
-export default function SimulationScreen({persona, seed, onDone, onBack}:{persona:'EC'|'PR'; seed:number; onDone:(r:any)=>void; onBack:()=>void}){
+export default function SimulationScreen({
+  persona, seed, onDone, onBack,
+  startingBars, carryPenalty=0
+}:{ persona:'EC'|'PR'; seed:number; onDone:(r:any)=>void; onBack:()=>void; startingBars?:Bars; carryPenalty?:number; }){
   const [cycle,setCycle] = useState(1)
-  const [bars,setBars] = useState<Bars>({water:80, food:80, health:80, morale:80})
+  const [bars,setBars] = useState<Bars>(startingBars ?? {water:80, food:80, health:80, morale:80})
   const [distance, setDistance] = useState<number>(0)
   const targetDistance = 60
-  const [log,setLog] = useState<string[]>(['Simulation begins. Evacuate within 72 hours.'])
+  const [log,setLog] = useState<string[]>([
+    'Simulation begins. Evacuate within 72 hours.',
+    carryPenalty>0 ? `Carry penalty active: -${carryPenalty} mi per move (over capacity)` : 'No carry penalty.'
+  ])
   const actions = useMemo<ActionDef[]>(()=>actionsData as any, [])
   const totalCycles = 18
 
   function choose(id:string){
     const action = actions.find(a=>a.id===id)!
     const nextBars = applyEffects(bars, action.effects as any)
-    const deltaDist = (action.effects as any).distance ?? 0
+    const rawDist = (action.effects as any).distance ?? 0
+    const deltaDist = Math.max(0, rawDist - (rawDist>0 ? carryPenalty : 0))
     const nextDistance = Math.max(0, distance + deltaDist)
 
     setBars(nextBars)
     setDistance(nextDistance)
-    setLog(prev=>[`${cycle}: ${action.name} → ${JSON.stringify(action.effects)}`, ...prev].slice(0,100))
+    setLog(prev=>[`${cycle}: ${action.name} → ${JSON.stringify(action.effects)} (Δdist ${deltaDist})`, ...prev].slice(0,100))
     const nextCycle = cycle+1
     const done = (nextCycle>totalCycles) || (nextBars.health<=0)
 
@@ -49,7 +56,7 @@ export default function SimulationScreen({persona, seed, onDone, onBack}:{person
         outcome = "Failed: Didn’t evacuate in time"
       }
 
-      onDone({ outcome, finalBars: nextBars, cycles: nextCycle-1, distance: nextDistance, targetDistance })
+      onDone({ outcome, finalBars: nextBars, cycles: nextCycle-1, distance: nextDistance, targetDistance, carryPenalty })
     }else{
       setCycle(nextCycle)
     }
@@ -60,7 +67,7 @@ export default function SimulationScreen({persona, seed, onDone, onBack}:{person
       <div className="panel">
         <div className="kicker">Decision Cycle</div>
         <div className="title">Cycle {cycle} / {totalCycles}</div>
-        <div className="small">Persona: {persona==='EC'?'Everyday Civilian':'Prepper'}</div>
+        <div className="small">Persona: {persona==='EC'?'Everyday Civilian':'Prepper'} • {carryPenalty>0?`Carry penalty -${carryPenalty} mi`: 'No carry penalty'}</div>
         <div style={{marginTop:12}}>
           <ResourceBars bars={bars} />
           <DistanceProgress distance={distance} target={targetDistance} />
