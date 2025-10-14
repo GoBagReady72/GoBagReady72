@@ -1,0 +1,13 @@
+{
+  "routes": [
+    {
+      "src": "^(.*)$",
+      "has": [{ "type": "host", "value": "admin.gobagready72.com" }],
+      "dest": "api/admin-guard.ts"
+    },
+    {
+      "src": "^/admin(?:/.*)?$",
+      "dest": "api/admin-guard.ts"
+    }
+  ]
+}
