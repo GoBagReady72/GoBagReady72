@@ -7,7 +7,8 @@
       "health": 5,
       "morale": 2,
       "food": -5,
-      "water": -5
+      "water": -5,
+      "distance": 0
     }
   },
   {
@@ -18,7 +19,8 @@
       "health": -5,
       "morale": 1,
       "food": -8,
-      "water": -10
+      "water": -10,
+      "distance": 4
     }
   },
   {
@@ -29,18 +31,20 @@
       "health": -10,
       "morale": 2,
       "food": -12,
-      "water": -15
+      "water": -15,
+      "distance": 7
     }
   },
   {
     "id": "ration",
     "name": "Ration",
-    "desc": "Conserve food and water this cycle.",
+    "desc": "Conserve food and water while moving slowly.",
     "effects": {
       "health": -3,
       "morale": -4,
       "food": 2,
-      "water": 2
+      "water": 2,
+      "distance": 2
     }
   },
   {
@@ -51,7 +55,8 @@
       "health": 3,
       "morale": 6,
       "food": -6,
-      "water": -6
+      "water": -6,
+      "distance": 0
     }
   }
 ]
