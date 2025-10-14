@@ -1,11 +1,44 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import storeItems from '../data/storeItems.json'
+import rawItems from '../data/storeItems.json'
 import ResourceBars from '../components/ResourceBars'
 
 type Bars = { water:number; food:number; health:number; morale:number }
 type Item = { id:string; name:string; category:string; cost:number; weight:number; effects: Partial<Bars> }
 
 const BASE_BARS: Bars = { water: 60, food: 60, health: 60, morale: 60 }
+
+// Enforce MSS-only taxonomy (visible order)
+const ALLOWED_CATEGORIES = [
+  'Water',
+  'Food',
+  'Shelter',
+  'Health & Sanitation',
+  'Comms & Navigation',
+  'Sustainability & Tools'
+] as const
+
+type Cat = typeof ALLOWED_CATEGORIES[number]
+
+// Map legacy categories → MSS buckets
+const REMAP: Record<string, Cat> = {
+  'Water': 'Water',
+  'Food': 'Food',
+  'Shelter': 'Shelter',
+  'Health': 'Health & Sanitation',
+  'Sanitation': 'Health & Sanitation',
+  'Comms & Nav': 'Comms & Navigation',
+  'Comms & Navigation': 'Comms & Navigation',
+  'Lighting': 'Sustainability & Tools',
+  'Sustainability': 'Sustainability & Tools',
+  'Tools': 'Sustainability & Tools'
+}
+
+function normalizeItems(items: Item[]): (Item & {category: Cat})[] {
+  return items.map(it => {
+    const cat = REMAP[it.category] ?? 'Sustainability & Tools'
+    return {...it, category: cat}
+  })
+}
 
 type CartEntry = { id: string; qty: number }
 
@@ -26,10 +59,10 @@ export default function StoreScreen({
   })=>void;
   persona?: 'EC'|'PR';
 }){
+  const items = useMemo<Item[]>(()=> normalizeItems(rawItems as any), [])
   const startingBudget = persona==='EC' ? 300 : 150
   const capacity = persona==='EC' ? 25 : 30 // lbs
 
-  const items = useMemo<Item[]>(()=> (storeItems as any) as Item[], [])
   const [qty, setQty] = useState<Record<string, number>>({})
   const [spent, setSpent] = useState(0)
   const [weight, setWeight] = useState(0)
@@ -79,8 +112,6 @@ export default function StoreScreen({
     onComplete({ cart, startingBars: bars, carryPenalty, weight, capacity, budget: startingBudget, spent })
   }
 
-  const categories = Array.from(new Set(items.map(i=>i.category)))
-
   return (
     <div className="panel">
       <div className="kicker">MSS Store</div>
@@ -119,7 +150,7 @@ export default function StoreScreen({
 
         <div className="vstack">
           <div className="kicker">Inventory</div>
-          {categories.map(cat => (
+          {ALLOWED_CATEGORIES.map(cat => (
             <div key={cat} className="vstack" style={{marginBottom:12}}>
               <div className="small" style={{textTransform:'uppercase', letterSpacing:'.12em'}}>{cat}</div>
               <div className="grid cols-2">

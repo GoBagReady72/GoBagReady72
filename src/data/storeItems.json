@@ -65,7 +65,7 @@
   {
     "id": "first_aid_kit",
     "name": "First Aid Kit (basic)",
-    "category": "Health",
+    "category": "Health & Sanitation",
     "cost": 25,
     "weight": 1.0,
     "effects": {
@@ -75,7 +75,7 @@
   {
     "id": "n95_goggles",
     "name": "N95 Masks + Safety Goggles",
-    "category": "Health",
+    "category": "Health & Sanitation",
     "cost": 18,
     "weight": 0.5,
     "effects": {
@@ -83,49 +83,9 @@
     }
   },
   {
-    "id": "radio_am_fm_wb",
-    "name": "Radio (AM/FM/WB)",
-    "category": "Comms & Nav",
-    "cost": 30,
-    "weight": 0.8,
-    "effects": {
-      "morale": 4
-    }
-  },
-  {
-    "id": "flashlight_headlamp",
-    "name": "Headlamp + Batteries",
-    "category": "Lighting",
-    "cost": 15,
-    "weight": 0.8,
-    "effects": {
-      "morale": 2
-    }
-  },
-  {
-    "id": "lighter_firesteel",
-    "name": "Lighter + Firesteel",
-    "category": "Sustainability",
-    "cost": 8,
-    "weight": 0.2,
-    "effects": {
-      "morale": 2
-    }
-  },
-  {
-    "id": "work_gloves",
-    "name": "Work Gloves",
-    "category": "Sustainability",
-    "cost": 10,
-    "weight": 0.6,
-    "effects": {
-      "health": 2
-    }
-  },
-  {
     "id": "wet_wipes_soap",
     "name": "Wet Wipes + Soap",
-    "category": "Sanitation",
+    "category": "Health & Sanitation",
     "cost": 12,
     "weight": 0.9,
     "effects": {
@@ -136,7 +96,7 @@
   {
     "id": "toilet_paper",
     "name": "Toilet Paper (compact)",
-    "category": "Sanitation",
+    "category": "Health & Sanitation",
     "cost": 4,
     "weight": 0.5,
     "effects": {
@@ -144,13 +104,53 @@
     }
   },
   {
+    "id": "radio_am_fm_wb",
+    "name": "Radio (AM/FM/WB)",
+    "category": "Comms & Navigation",
+    "cost": 30,
+    "weight": 0.8,
+    "effects": {
+      "morale": 4
+    }
+  },
+  {
     "id": "map_local",
     "name": "Paper Map (Local)",
-    "category": "Comms & Nav",
+    "category": "Comms & Navigation",
     "cost": 6,
     "weight": 0.2,
     "effects": {
       "morale": 1
+    }
+  },
+  {
+    "id": "flashlight_headlamp",
+    "name": "Headlamp + Batteries",
+    "category": "Sustainability & Tools",
+    "cost": 15,
+    "weight": 0.8,
+    "effects": {
+      "morale": 2
+    }
+  },
+  {
+    "id": "lighter_firesteel",
+    "name": "Lighter + Firesteel",
+    "category": "Sustainability & Tools",
+    "cost": 8,
+    "weight": 0.2,
+    "effects": {
+      "morale": 2
+    }
+  },
+  {
+    "id": "work_gloves",
+    "name": "Work Gloves",
+    "category": "Sustainability & Tools",
+    "cost": 10,
+    "weight": 0.6,
+    "effects": {
+      "health": 2
     }
   }
 ]
