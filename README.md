@@ -1,16 +1,16 @@
-## Hi there 👋
+# GoBag: Ready72 — Survival Simulator (MVP)
+**Powered by HazMSS360™**
 
-<!--
-**GoBagReady72/GoBagReady72** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+React + TypeScript + Vite scaffold with a 4‑hour decision loop, resource bars,
+and a deterministic screen flow: Title → Briefing → Store → Simulation → Debrief.
 
-Here are some ideas to get you started:
+## Quick Start
+```bash
+npm install
+npm run dev
+```
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## What’s inside
+- `/src/routes/` — screens (Title, Briefing, Store, Simulation, Debrief)
+- `/src/components/` — ResourceBars, DecisionPanel, EventLog, PersonaCard
+- `/src/data/actions.json` — example actions
