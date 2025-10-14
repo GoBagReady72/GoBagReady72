@@ -1,4 +1,6 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "routes": [
     {
       "src": "^(.*)$",
@@ -8,6 +10,10 @@
     {
       "src": "^/admin(?:/.*)?$",
       "dest": "api/admin-guard.ts"
+    },
+    {
+      "src": "^(?!/api/).*$",
+      "dest": "/index.html"
     }
   ]
 }

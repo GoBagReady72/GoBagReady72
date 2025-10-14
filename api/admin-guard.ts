@@ -1,4 +1,4 @@
-// Vercel Edge Function for Basic Auth + admin subdomain rewrite
+// Vercel Edge Function for Basic Auth + admin subdomain rewrite (Vite-compatible)
 export const config = { runtime: "edge" } as const;
 
 function parseBasicAuth(header: string | null) {
@@ -37,6 +37,6 @@ export default async function handler(req: Request): Promise<Response> {
     }
   }
 
-  // Fall-through to app
+  // Fall-through to app/static
   return fetch(req);
 }

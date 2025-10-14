@@ -1,0 +1,10 @@
+❗ Required cleanup (do these before redeploy):
+1) DELETE any of these files if present in your repo root:
+   - middleware.ts
+   - middleware.js
+   - next.config.js
+2) Ensure package.json does NOT depend on "next". This is a Vite app.
+3) In Vercel → Project → Settings → General → Framework = Vite.
+4) In Vercel → Project → Settings → Build & Output:
+   - Build Command: npm run build
+   - Output Directory: dist
