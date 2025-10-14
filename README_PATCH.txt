@@ -1,26 +1,23 @@
-GoBag: Ready72 — Store & Load‑out MVP Patch
-===========================================
+GoBag: Ready72 — Store Quantities Patch
+======================================
 
-Adds a functional MSS Store:
-- Budget & capacity by persona (EC: $300/25 lb; PR: $150/30 lb)
-- Item selection with cost, weight, and effects on starting bars
-- Carry penalty if weight exceeds capacity (up to -3 mi per move)
-- Start simulation with projected bars and penalty applied
+This update lets players add **multiples of any item** in the MSS Store.
+- Budget & weight update per quantity
+- Starting bars scale by item effects × qty
+- Cart shows totals; carry penalty computed from total weight
+- Payload now returns `cart: { id, qty }[]` (instead of a flat `selected` list)
 
 Files:
-- src/data/storeItems.json
-- src/routes/StoreScreen.tsx
-- src/routes/SimulationScreen.tsx (accepts startingBars + carryPenalty)
-- src/App.tsx (wires store → simulation)
+- src/routes/StoreScreen.tsx  (updated to support per-item quantities)
 
-Apply:
-1) Unzip at repo root (same level as /src), overwrite files.
-2) Commit & push:
+Install:
+1) Unzip at repo root (same level as /src).
+2) Overwrite files.
+3) Commit & push:
    git add .
-   git commit -m "feat(store): MSS Store with budget/weight and starting bars"
+   git commit -m "feat(store): support per-item quantities and cart totals"
    git push
 
-Tuneables:
-- Persona budget/capacity (StoreScreen.tsx)
-- Item catalog & effects (storeItems.json)
-- Evac target distance and penalty math (SimulationScreen.tsx)
+Notes:
+- Simulation integration is unchanged; we still pass `startingBars` and `carryPenalty`.
+- You can log the `cart` in App.tsx if you want to persist a run record for analytics.
