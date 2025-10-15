@@ -1,5 +1,18 @@
-// api/track-proxy.js — diagnostics enabled
+// api/track-proxy.js — adds GET diagnostics so we can see what's wrong
 export default async function handler(req, res) {
+  // GET: lightweight diagnostics (no secrets revealed)
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      ok: true,
+      diag: {
+        has_ADMIN_TRACK_ENDPOINT: !!process.env.ADMIN_TRACK_ENDPOINT,
+        has_ADMIN_SHARED_SECRET: !!process.env.ADMIN_SHARED_SECRET,
+        forwarded_origin: process.env.FORWARDED_ORIGIN || null,
+        node: process.versions?.node || null,
+      }
+    });
+  }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
@@ -39,12 +52,12 @@ export default async function handler(req, res) {
     }
 
     const text = await upstream.text();
-    let json;
-    try { json = JSON.parse(text); } catch { /* keep text */ }
-
-    return res.status(upstream.status).json(
-      json ?? { passthrough: text, status: upstream.status }
-    );
+    try {
+      const json = JSON.parse(text);
+      return res.status(upstream.status).json(json);
+    } catch {
+      return res.status(upstream.status).json({ passthrough: text, status: upstream.status });
+    }
   } catch (e) {
     return res.status(500).json({
       error: 'Proxy failure',
