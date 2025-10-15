@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ready72 Admin</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; padding:24px; background:#0b0f14; color:#e7eef7; }
+      .container { max-width: 1100px; margin: 0 auto; }
+      .grid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+      .card { background:#121923; border:1px solid #1f2a37; border-radius:12px; padding:16px; }
+      .title { font-size:24px; font-weight:700; margin:0 0 8px 0; }
+      .subtitle { font-size:13px; opacity:0.8; }
+      .section { margin-top:24px; }
+      .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+      .warn { background:#2b1a00; color:#ffd699; border:1px solid #5a3b00; padding:10px 12px; border-radius:10px; margin-top:10px; }
+      label { font-size:12px; opacity:0.8; }
+      input, select, button { background:#0d141d; color:#e7eef7; border:1px solid #243145; border-radius:8px; padding:8px 10px; }
+      button { cursor:pointer; }
+      h2 { margin:0 0 12px 0; }
+      table { width:100%; border-collapse: collapse; }
+      th, td { border-bottom:1px solid #1f2a37; padding:8px; text-align:left; font-size:14px; }
+      .muted { opacity:0.7; font-size:12px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
