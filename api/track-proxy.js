@@ -1,50 +1,54 @@
-// api/track-proxy.js
-// Vercel Serverless Function for the GAME repo.
-// Purpose: accept browser POSTs without any shared secret and forward
-// to the Admin API with server-held ADMIN_SHARED_SECRET.
-// This keeps secrets out of the client. CORS is not required here if
-// the game calls same-origin (/api/track-proxy).
-
+// api/track-proxy.js — diagnostics enabled
 export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.status(204).end();
-  }
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const adminUrl = process.env.ADMIN_TRACK_ENDPOINT; // e.g. https://admin.gobagready72.com/api/track
-    const adminSecret = process.env.ADMIN_SHARED_SECRET;
-    if (!adminUrl || !adminSecret) {
-      return res.status(500).json({ error: 'Server not configured' });
+    const adminEndpoint   = process.env.ADMIN_TRACK_ENDPOINT;
+    const adminSecret     = process.env.ADMIN_SHARED_SECRET;
+    const forwardedOrigin = process.env.FORWARDED_ORIGIN || 'https://beta.gobagready72.com';
+
+    if (!adminEndpoint || !adminSecret) {
+      return res.status(500).json({
+        error: 'Proxy env not configured',
+        have: {
+          ADMIN_TRACK_ENDPOINT: !!adminEndpoint,
+          ADMIN_SHARED_SECRET: !!adminSecret,
+          FORWARDED_ORIGIN: !!forwardedOrigin
+        }
+      });
     }
 
-    // pass through only required fields; ignore any env/alias attempts from client
-    const { session_id, persona, category, outcome } = req.body || {};
-    if (!session_id || !persona || !category || !outcome) {
-      return res.status(400).json({ error: 'Missing field(s)' });
+    const body = req.body || {};
+
+    let upstream;
+    try {
+      upstream = await fetch(adminEndpoint, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-admin-secret': adminSecret,
+          'Origin': forwardedOrigin
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (e) {
+      return res.status(502).json({
+        error: 'Upstream fetch threw',
+        detail: String(e?.message || e)
+      });
     }
 
-    // Forward server-to-server with the secret header
-    const forwardResp = await fetch(adminUrl, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-admin-secret': adminSecret,
-        // Propagate Origin to let admin map env by origin if desired
-        'origin': process.env.FORWARDED_ORIGIN || ''
-      },
-      body: JSON.stringify({ session_id, persona, category, outcome })
-    });
+    const text = await upstream.text();
+    let json;
+    try { json = JSON.parse(text); } catch { /* keep text */ }
 
-    const text = await forwardResp.text();
-    res.status(forwardResp.status).send(text);
+    return res.status(upstream.status).json(
+      json ?? { passthrough: text, status: upstream.status }
+    );
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'Proxy failure' });
+    return res.status(500).json({
+      error: 'Proxy failure',
+      detail: String(e?.message || e)
+    });
   }
 }
