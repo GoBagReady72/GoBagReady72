@@ -1,4 +1,3 @@
-
 // src/components/KOEPanel.tsx
 import { useMemo, useState } from 'react';
 import { runKOE } from '../koe/engine';
@@ -15,6 +14,7 @@ type KOEId =
   | 'eq-aftershock' | 'eq-outage' | 'eq-egress';
 
 type RegionKey = 'coastal' | 'wildfire' | 'winter' | 'earthquake';
+type PresetKey = 'everyday_female' | 'everyday_male' | 'family_infant' | 'senior';
 
 const REGIONS = {
   coastal: RegionCoastal,
@@ -23,45 +23,138 @@ const REGIONS = {
   earthquake: RegionEarthquake,
 } as const;
 
+type InvState = {
+  water_filter: boolean;
+  bottled_water: number;
+  kcal_bar_2400: number;
+  insulation_layer: boolean;
+  waterproof_boots: boolean;
+  wool_blanket: boolean;
+  tarp: boolean;
+  offline_maps: boolean;
+  work_gloves: boolean;
+  goggles: boolean;
+  respirator: boolean;
+  bleach: boolean;
+  fuel_can: boolean;
+  cooler: boolean;
+  ice_blocks: number;
+  toilet_liners: number;
+  headlamp: boolean;
+  battery_bank: boolean;
+  go_bag: boolean;
+  box_fan: boolean;
+  furnace_filters: number;
+  propane_heater: boolean;
+  tire_chains: boolean;
+  shovel: boolean;
+  camp_stove: boolean;
+  radio: boolean;
+};
+
+const DEFAULT_INV: InvState = {
+  water_filter: true,
+  bottled_water: 2,
+  kcal_bar_2400: 1,
+  insulation_layer: true,
+  waterproof_boots: false,
+  wool_blanket: false,
+  tarp: true,
+  offline_maps: true,
+  work_gloves: false,
+  goggles: false,
+  respirator: false,
+  bleach: false,
+  fuel_can: true,
+  cooler: false,
+  ice_blocks: 0,
+  toilet_liners: 0,
+  headlamp: true,
+  battery_bank: true,
+  go_bag: true,
+  box_fan: false,
+  furnace_filters: 0,
+  propane_heater: false,
+  tire_chains: false,
+  shovel: false,
+  camp_stove: false,
+  radio: false,
+};
+
+function presetInventory(key: PresetKey): InvState {
+  // Cohort presets = pragmatic starting points for demos (not stereotypes).
+  switch (key) {
+    case 'everyday_female':
+      return {
+        ...DEFAULT_INV,
+        waterproof_boots: true,
+        respirator: true,
+        fuel_can: false,
+        radio: true,
+      };
+    case 'everyday_male':
+      return {
+        ...DEFAULT_INV,
+        waterproof_boots: true,
+        kcal_bar_2400: 2,
+        work_gloves: true,
+        respirator: true,
+        fuel_can: true,
+        shovel: true,
+        radio: true,
+      };
+    case 'family_infant':
+      return {
+        ...DEFAULT_INV,
+        bottled_water: 4,
+        kcal_bar_2400: 2,
+        wool_blanket: true,
+        work_gloves: true,
+        goggles: true,
+        respirator: true,
+        bleach: true,
+        fuel_can: true,
+        cooler: true,
+        ice_blocks: 2,
+        toilet_liners: 4,
+        camp_stove: true,
+        radio: true,
+      };
+    case 'senior':
+      return {
+        ...DEFAULT_INV,
+        bottled_water: 3,
+        wool_blanket: true,
+        goggles: true,
+        respirator: true,
+        fuel_can: false,
+        toilet_liners: 2,
+        radio: true,
+      };
+    default:
+      return DEFAULT_INV;
+  }
+}
+
 export default function KOEPanel() {
   const [regionKey, setRegionKey] = useState<RegionKey>('coastal');
   const [koeId, setKoeId] = useState<KOEId>('early-evac');
   const [seed, setSeed] = useState<number>(42);
 
-  const [inv, setInv] = useState({
-    water_filter: true,
-    bottled_water: 2,
-    kcal_bar_2400: 1,
-    insulation_layer: true,
-    waterproof_boots: false,
-    wool_blanket: false,
-    tarp: true,
-    offline_maps: true,
-    work_gloves: false,
-    goggles: false,
-    respirator: false,
-    bleach: false,
-    fuel_can: true,
-    cooler: false,
-    ice_blocks: 0,
-    toilet_liners: 0,
-    headlamp: true,
-    battery_bank: true,
-    go_bag: true,
-    box_fan: false,
-    furnace_filters: 0,
-    // winter-specific
-    propane_heater: false,
-    tire_chains: false,
-    shovel: false,
-    camp_stove: false,
-    radio: false,
-  });
+  const [preset, setPreset] = useState<PresetKey>('everyday_female');
+  const [inv, setInv] = useState<InvState>(DEFAULT_INV);
 
-  function setBool(key: keyof typeof inv, val: boolean) {
+  function applyPreset(p: PresetKey) {
+    setInv(presetInventory(p));
+  }
+  function resetDefault() {
+    setInv(DEFAULT_INV);
+  }
+
+  function setBool(key: keyof InvState, val: boolean) {
     setInv(prev => ({ ...prev, [key]: val }));
   }
-  function setQty(key: keyof typeof inv, val: number) {
+  function setQty(key: keyof InvState, val: number) {
     const n = Math.max(0, Math.floor(val || 0));
     setInv(prev => ({ ...prev, [key]: n }));
   }
@@ -122,6 +215,7 @@ export default function KOEPanel() {
     <div style={{ padding: 16, border: '1px solid #222', borderRadius: 8 }}>
       <h2 style={{ marginTop: 0 }}>KOE Simulator — {REGIONS[regionKey].name}</h2>
 
+      {/* Controls */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
         <label style={{ fontSize: 14 }}>
           Region:&nbsp;
@@ -130,10 +224,12 @@ export default function KOEPanel() {
             onChange={(e) => {
               const val = e.target.value as RegionKey;
               setRegionKey(val);
-              setKoeId(val === 'coastal' ? 'early-evac'
-                    : val === 'wildfire' ? 'wf-early-evac'
-                    : val === 'winter' ? 'ws-alert'
-                    : 'eq-aftershock');
+              setKoeId(
+                val === 'coastal' ? 'early-evac' :
+                val === 'wildfire' ? 'wf-early-evac' :
+                val === 'winter' ? 'ws-alert' :
+                'eq-aftershock'
+              );
             }}
             style={{ padding: '4px 6px' }}
           >
@@ -170,6 +266,26 @@ export default function KOEPanel() {
         <button onClick={onRun}>Run</button>
       </div>
 
+      {/* Presets */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+        <label style={{ fontSize: 14 }}>
+          Preset:&nbsp;
+          <select
+            value={preset}
+            onChange={(e) => setPreset(e.target.value as PresetKey)}
+            style={{ padding: '4px 6px' }}
+          >
+            <option value="everyday_female">Everyday Female</option>
+            <option value="everyday_male">Everyday Male</option>
+            <option value="family_infant">Family w/ Infant</option>
+            <option value="senior">Senior</option>
+          </select>
+        </label>
+        <button onClick={() => applyPreset(preset)}>Apply Preset</button>
+        <button onClick={resetDefault}>Reset</button>
+      </div>
+
+      {/* Inventory Editor */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Inventory (MSS-aligned)</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
@@ -219,6 +335,7 @@ export default function KOEPanel() {
         </div>
       </div>
 
+      {/* HUD */}
       {state && (
         <div
           style={{
@@ -238,6 +355,7 @@ export default function KOEPanel() {
         </div>
       )}
 
+      {/* Log */}
       <div>
         <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Event Log</div>
         <pre
@@ -252,7 +370,7 @@ export default function KOEPanel() {
             margin: 0,
           }}
         >
-{state?.log?.length ? state.log.join('\n') : 'Choose a Region & KOE, set inventory, then Run.'}
+{state?.log?.length ? state.log.join('\n') : 'Choose a Region & KOE, set or apply a Preset, then Run.'}
         </pre>
       </div>
     </div>
@@ -307,7 +425,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 // ---------- builder ----------
-function buildInventory(inv: any): InventoryItem[] {
+function buildInventory(inv: InvState): InventoryItem[] {
   const items: InventoryItem[] = [];
 
   if (inv.water_filter) items.push({ id: 'water_filter', category: 'WATER', qty: 1 });
