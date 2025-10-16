@@ -1,4 +1,3 @@
-
 // src/components/KOEPanel.tsx
 import { useMemo, useState } from 'react';
 import { runKOE } from '../koe/engine';
@@ -135,7 +134,7 @@ export default function KOEPanel() {
           KOE:&nbsp;
           <select
             value={koeId}
-            onChange={(e) => setKoeId(e.target.value as KOeId)}
+            onChange={(e) => setKoeId(e.target.value as KOEId)}
             style={{ padding: '4px 6px' }}
           >
             {koeOptions.map(k => (
