@@ -14,3 +14,4 @@ npm run dev
 - `/src/routes/` — screens (Title, Briefing, Store, Simulation, Debrief)
 - `/src/components/` — ResourceBars, DecisionPanel, EventLog, PersonaCard
 - `/src/data/actions.json` — example actions
+
