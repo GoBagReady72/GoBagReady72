@@ -1,14 +1,20 @@
-✅ GoBag: Ready72 — IntroStart Fix (v0.7.2-hotpatch)
---------------------------------------------------
-This patch ensures the game starts at the **Intro/Title** screen instead of the persona cards.
+GoBag: Ready72 — IntroStart v0.7.3 (Robust)
+-------------------------------------------
+Purpose: Guarantee the app starts at the Intro screen, with an optional URL override.
 
-1️⃣ Upload both files into your /src folder:
-    • App.tsx  (overwrite existing)
-    • Ready72WireframesV071.tsx (overwrite existing)
+What it adds
+- Default start at Intro (scene 0)
+- URL override for quick QA: ?scene=0..5 (or #0..#5)
+  Example: https://beta.gobagready72.com/?scene=0
 
-2️⃣ Commit directly to main on GitHub.
+How to apply (GitHub web UI)
+1) In your repo, open /src/
+2) Upload both files from this ZIP (overwrite App.tsx and Ready72WireframesV071.tsx)
+3) Commit to main
+4) Hard refresh (Ctrl/Cmd+Shift+R)
 
-3️⃣ Vercel will auto-deploy.
-
-After deployment, the game will start at the Intro/Title screen.
-Click “Begin HazAssist Briefing” to reach the persona cards.
+Notes
+- If your App.tsx imports a different wireframe file, either update that import to Ready72WireframesV071,
+  or copy the initial-scene logic into the file your App actually imports.
+- If older wireframes (e.g., V042, V070, V072Patch) remain in /src, they are fine to keep, but ensure App.tsx imports V071.
+- To test quickly: open /?scene=1 to start at Persona; /?scene=0 to start at Intro.
