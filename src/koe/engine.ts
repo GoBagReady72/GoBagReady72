@@ -1,26 +1,6 @@
-
-// src/koe/engine.ts — v0.8.1 (Canon Engine Hooks)
-// Backward-compatible drop-in replacing older engine.
-// Adds persona-aware hooks: encumbrance → time & morale cost; stamina buffering.
-
-/* Expected minimal types (kept loose for compatibility) */
-export type SimState = {
-  minute: number;
-  hydration: number;
-  calories: number;
-  morale: number;
-  roadAccess: number;
-  cellService: number;
-  airQuality: number;
-  encumbrance?: number;     // 0..n (0 = light; >0 = heavy); optional
-  inventory: Array<{ id: string; category: string; qty?: number }>;
-  log: string[];
-  outcome?: 'win' | 'loss' | 'neutral';
-};
-
-type BranchCond = {
-  requiresAll?: Array<{ category: string; itemId: string; qty?: number }>;
-};
+// src/koe/engine.ts — v0.8.1a (Canon Engine Hooks, type-safe with existing types)
+// NOTE: We intentionally export ONLY runKOE to avoid type name collisions with src/koe/types.
+// This file uses minimal 'any' typing to stay compatible with your Region/KOE/SimState shapes.
 
 type Effect = {
   timeMinutes?: number;
@@ -32,43 +12,16 @@ type Effect = {
   airQuality?: number;
 };
 
-type TimelineNode = {
-  id: string;
-  atMinutes: number;
-  description: string;
-  branches?: Array<{
-    id: string;
-    description: string;
-    condition?: BranchCond;
-    effects?: Effect;
-    outcome?: 'win' | 'loss' | 'neutral';
-  }>;
-  fallback?: {
-    id: string;
-    description: string;
-    effects?: Effect;
-    outcome?: 'win' | 'loss' | 'neutral';
-  };
-};
+// ---------- utils ----------
+function clamp(n: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, n)); }
 
-type KOE = {
-  id: string;
-  name: string;
-  summary: string;
-  kickoffEffects?: Effect;
-  timeline: TimelineNode[];
-};
+function fmtTime(minute: number): string {
+  const h = Math.floor(minute / 60);
+  const m = minute % 60;
+  return `t+${h ? h + 'h' : ''}${h && m ? ' ' : ''}${m ? m + 'm' : ''}`.replace(/t\+$/, 't+0m');
+}
 
-type Region = {
-  id: string;
-  name: string;
-  hazards: string[];
-  koeOptions: KOE[];
-};
-
-type RunOpts = { seed?: number; maxMinutes?: number };
-
-/* Deterministic RNG (mulberry32) */
+// Deterministic RNG (mulberry32)
 function mulberry32(a: number) {
   return function() {
     let t = (a += 0x6D2B79F5);
@@ -78,40 +31,37 @@ function mulberry32(a: number) {
   };
 }
 
-/* Inventory helpers */
-function hasAll(inv: SimState['inventory'], requires?: BranchCond['requiresAll']): boolean {
+// Inventory requirement check.
+// Supports requiresAll entries where itemId may be omitted (meaning "any item in category").
+function hasAll(inv: any[], requires?: Array<{ category: string; itemId?: string; qty?: number }>): boolean {
   if (!requires || !requires.length) return true;
   for (const need of requires) {
-    const got = inv.find(i => i.category === need.category && i.id === need.itemId);
-    const qty = got?.qty ?? 0;
-    if (!got || qty < (need.qty ?? 1)) return false;
+    const matches = inv.filter(i => i?.category === need.category && (need.itemId ? i?.id === need.itemId : true));
+    const totalQty = matches.reduce((s, it) => s + (it?.qty ?? 0), 0);
+    const needed = need.qty ?? 1;
+    if (totalQty < needed) return false;
   }
   return true;
 }
 
-/* Clamp utility */
-function clamp(n: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, n)); }
-
-/* Apply effects with persona-aware hooks */
-function applyEffects(s: SimState, eff?: Effect, persona: { encFactor: number; stam: number }) {
+// Apply effects with persona-aware hooks (encumbrance & stamina)
+function applyEffects(s: any, eff: Effect | undefined, persona: { encFactor: number; stam: number }) {
   if (!eff) return;
 
-  // Time cost: heavier packs (encFactor > 0) increase time; stamina offsets.
   const baseTime = eff.timeMinutes ?? 0;
-  const timeMult = 1 + persona.encFactor;          // e.g., enc 2 => +2*X
-  const stamMult = 1 / Math.max(0.5, persona.stam); // higher stamina reduces time
+  const timeMult = 1 + persona.encFactor;             // heavier -> slower
+  const stamMult = 1 / Math.max(0.5, persona.stam);   // fitter -> faster
   const dt = Math.round(baseTime * timeMult * stamMult);
 
   s.minute += dt;
 
-  // Resource drains per minute of elapsed time (simple, tunable)
+  // Drains proportional to elapsed time and weight burden
   const hours = dt / 60;
-  const fatigue = persona.encFactor * hours;        // morale drain from weight over time
+  const fatigue = persona.encFactor * hours;
   s.hydration -= Math.round(2 * hours * (1 + persona.encFactor * 0.5));
   s.calories  -= Math.round(120 * hours * (1 + persona.encFactor * 0.3));
   s.morale    -= Math.round(fatigue);
 
-  // Direct stat effects
   if (eff.hydration) s.hydration += eff.hydration;
   if (eff.calories)  s.calories  += eff.calories;
   if (eff.morale)    s.morale    += eff.morale;
@@ -119,9 +69,7 @@ function applyEffects(s: SimState, eff?: Effect, persona: { encFactor: number; s
   if (eff.cellService) s.cellService += eff.cellService;
   if (eff.airQuality) s.airQuality += eff.airQuality;
 
-  // Clamp
   s.hydration = clamp(s.hydration, 0, 100);
-  // calories allowed to go negative to represent deficit; cap upper bound
   s.calories = Math.min(s.calories, 4000);
   s.morale = clamp(s.morale, 0, 100);
   s.roadAccess = clamp(s.roadAccess, -2, 3);
@@ -129,58 +77,70 @@ function applyEffects(s: SimState, eff?: Effect, persona: { encFactor: number; s
   s.airQuality = clamp(s.airQuality, -3, 3);
 }
 
-/* Main runner */
-export function runKOE(region: Region, koeId: string, initial: SimState, opts: RunOpts = {}): SimState {
+// ---------- main ----------
+export function runKOE(region: any, koeId: string, initial: any, opts: { seed?: number; maxMinutes?: number } = {}) {
   const rng = mulberry32((opts.seed ?? 42) | 0);
   const maxMinutes = opts.maxMinutes ?? 8 * 60;
 
-  const s: SimState = JSON.parse(JSON.stringify(initial));
-  const enc = Math.max(0, (s.encumbrance ?? 0));     // higher => heavier
-  const persona = {
-    encFactor: enc * 0.05,   // each encumbrance point adds 5% time & fatigue
-    stam: 1.0,               // optional: override via (initial as any).staminaBase
-  };
-  const maybeStam = (initial as any).staminaBase;
-  if (typeof maybeStam === 'number' && isFinite(maybeStam) && maybeStam > 0) persona.stam = maybeStam;
+  // clone
+  const s: any = JSON.parse(JSON.stringify(initial));
 
-  const koe = region.koeOptions.find(k => k.id === koeId);
+  // Ensure encumbrance exists for downstream typing expectations
+  if (typeof s.encumbrance !== 'number' || !isFinite(s.encumbrance)) s.encumbrance = 0;
+
+  // Persona hooks
+  const enc = Math.max(0, s.encumbrance);
+  const persona = {
+    encFactor: enc * 0.05, // each encumbrance point adds ~5% time/fatigue
+    stam: 1.0,
+  };
+  if (typeof s.staminaBase === 'number' && isFinite(s.staminaBase) && s.staminaBase > 0) {
+    persona.stam = s.staminaBase;
+  }
+
+  // Find KOE by id from region
+  const koe = (region?.koeOptions || []).find((k: any) => k?.id === koeId);
   if (!koe) {
-    s.log.push(`KOE not found: ${koeId}`);
+    s.log?.push?.(`KOE not found: ${koeId}`);
     s.outcome = 'loss';
     return s;
   }
 
   // Kickoff
+  if (!Array.isArray(s.log)) s.log = [];
   s.log.push(`KOE: ${koe.name} — ${koe.summary}`);
-  applyEffects(s, koe.kickoffEffects, persona);
+  applyEffects(s, koe.kickoffEffects as Effect | undefined, persona);
 
-  // Timeline (ordered by atMinutes)
-  const nodes = [...koe.timeline].sort((a, b) => a.atMinutes - b.atMinutes);
+  // Timeline (sorted)
+  const nodes: any[] = [...(koe.timeline || [])].sort((a, b) => (a.atMinutes ?? 0) - (b.atMinutes ?? 0));
   for (const node of nodes) {
     if (s.minute >= maxMinutes) break;
 
-    // Advance to node time (affected by encumbrance as movement / setup)
-    if (node.atMinutes > s.minute) {
-      const travelEff: Effect = { timeMinutes: node.atMinutes - s.minute };
-      applyEffects(s, travelEff, persona);
+    // advance (movement/setup cost)
+    const targetMin = node.atMinutes ?? s.minute;
+    if (targetMin > s.minute) {
+      applyEffects(s, { timeMinutes: targetMin - s.minute }, persona);
     }
 
     s.log.push(`${fmtTime(s.minute)}: ${node.description}`);
 
-    // Pick first satisfied branch; else fallback
     let appliedOutcome: 'win' | 'loss' | 'neutral' | undefined;
-    const branches = node.branches || [];
-    let picked = null as null | typeof branches[number];
+    const branches: any[] = node.branches || [];
+
+    // first satisfied branch
+    let picked: any = null;
     for (const b of branches) {
-      if (hasAll(s.inventory, b.condition?.requiresAll)) { picked = b; break; }
+      const reqs = b?.condition?.requiresAll as Array<{ category: string; itemId?: string; qty?: number }> | undefined;
+      if (hasAll(s.inventory || [], reqs)) { picked = b; break; }
     }
+
     if (picked) {
       s.log.push(`→ ${picked.description}`);
-      applyEffects(s, picked.effects, persona);
+      applyEffects(s, picked.effects as Effect | undefined, persona);
       appliedOutcome = picked.outcome;
     } else if (node.fallback) {
       s.log.push(`→ ${node.fallback.description}`);
-      applyEffects(s, node.fallback.effects, persona);
+      applyEffects(s, node.fallback.effects as Effect | undefined, persona);
       appliedOutcome = node.fallback.outcome;
     }
 
@@ -188,22 +148,13 @@ export function runKOE(region: Region, koeId: string, initial: SimState, opts: R
     if (s.minute >= maxMinutes) break;
   }
 
-  // Outcome resolution: if none set by branches, infer from core stats
   if (!s.outcome) {
-    const ok = s.hydration >= 30 && s.morale >= 40;
+    const ok = (s.hydration ?? 0) >= 30 && (s.morale ?? 0) >= 40;
     s.outcome = ok ? 'neutral' : 'loss';
   }
 
-  // Hard stop at max time horizon
-  s.minute = Math.min(s.minute, maxMinutes);
-
-  // Final summary line
+  s.minute = Math.min(s.minute ?? 0, maxMinutes);
   s.log.push(`Outcome: ${String(s.outcome).toUpperCase()}`);
-  return s;
-}
 
-function fmtTime(minute: number): string {
-  const h = Math.floor(minute / 60);
-  const m = minute % 60;
-  return `t+${h ? h + 'h' : ''}${h && m ? ' ' : ''}${m ? m + 'm' : ''}`.replace(/t\+$/, 't+0m');
+  return s;
 }
