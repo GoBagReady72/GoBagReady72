@@ -1,3 +1,6 @@
+// Shim so TS stops complaining about process in serverless files
+declare const process: { env?: Record<string, string | undefined> };
+
 // Vercel Edge Function for Basic Auth + admin subdomain rewrite (Vite-compatible)
 export const config = { runtime: "edge" } as const;
 
