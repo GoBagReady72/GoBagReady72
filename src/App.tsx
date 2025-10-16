@@ -1,5 +1,5 @@
-import Ready72WireframesV04 from './Ready72WireframesV04';
+import Ready72WireframesV041 from './Ready72WireframesV041';
 
 export default function App() {
-  return <Ready72WireframesV04 />;
+  return <Ready72WireframesV041 />;
 }
