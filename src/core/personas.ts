@@ -1,5 +1,6 @@
-
+// src/core/personas.ts
 // Canon personas and visual variants (Ready72 Canon v1)
+
 export type Archetype = 'EC' | 'PR' | 'PRO';
 
 export interface PersonaSpec {
@@ -10,7 +11,7 @@ export interface PersonaSpec {
   bagLimitPct: number;   // % of body weight advisable to carry (0..1)
   staminaBase: number;   // baseline endurance multiplier (1.0 = neutral)
   moraleSlope: number;   // negative => slower morale decay (e.g., -0.1)
-  kitDurability: number; // 0..1 average condition/maint
+  kitDurability: number; // 0..1 average condition/maintenance
   startingFunds: number; // prep-phase budget
 }
 
@@ -29,7 +30,7 @@ export const PERSONAS: Record<Archetype, PersonaSpec> = {
   PR: {
     id: 'PR',
     name: 'Prepper',
-    mssStart: 0.65, // max 0.70 per canon; use 0.65 start
+    mssStart: 0.65,         // canon start (≤ 0.70 max)
     mssCap: 0.98,
     bagLimitPct: 0.20,
     staminaBase: 1.15,
@@ -47,45 +48,64 @@ export const PERSONAS: Record<Archetype, PersonaSpec> = {
     moraleSlope: -0.08,
     kitDurability: 0.95,
     startingFunds: 80,
-  }
+  },
 };
 
-// Visual skins (representation layer) — demographic variants
+// ---------- Representation Layer (visual skins) ----------
+
 export type Gender = 'male' | 'female';
 export type Ethnicity = 'black' | 'white' | 'latino' | 'asian';
 
 export interface VisualSkin {
-  id: string; // e.g., EC_female_latino
+  id: string;            // e.g., "EC_female_latino"
   archetype: Archetype;
   gender: Gender;
   ethnicity: Ethnicity;
-  label: string;
+  label: string;         // e.g., "Everyday Civilian — Female / Latino(a)"
 }
 
-export const VISUALS: VisualSkin[] = ([] as VisualSkin[]).concat(
-  ...(['male','female'] as Gender[]).map(g =>
-    (['black','white','latino','asian'] as Ethnicity[]).map(e => ({
+const genders: Gender[] = ['male', 'female'];
+const ethnicities: Ethnicity[] = ['black', 'white', 'latino', 'asian'];
+
+function titleCase(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function ethnicityLabel(e: Ethnicity): string {
+  return e === 'latino' ? 'Latino(a)' : titleCase(e);
+}
+
+function makeLabel(prefix: string, g: Gender, e: Ethnicity): string {
+  const gLabel = g === 'male' ? 'Male' : 'Female';
+  return `${prefix} — ${gLabel} / ${ethnicityLabel(e)}`;
+}
+
+export const VISUALS: VisualSkin[] = [
+  ...genders.flatMap((g) =>
+    ethnicities.map((e) => ({
       id: `EC_${g}_${e}`,
       archetype: 'EC' as const,
-      gender: g, ethnicity: e,
-      label: `Everyday Civilian — ${g[0].upper()} / ${e}`
+      gender: g,
+      ethnicity: e,
+      label: makeLabel('Everyday Civilian', g, e),
     }))
-  )
-).concat(
-  ...(['male','female'] as Gender[]).map(g =>
-    (['black','white','latino','asian'] as Ethnicity[]).map(e => ({
+  ),
+  ...genders.flatMap((g) =>
+    ethnicities.map((e) => ({
       id: `PR_${g}_${e}`,
       archetype: 'PR' as const,
-      gender: g, ethnicity: e,
-      label: `Prepper — ${g[0].upper()} / ${e}`
+      gender: g,
+      ethnicity: e,
+      label: makeLabel('Prepper', g, e),
     }))
-  )
-).concat(
-  ...(['male','female'] as Gender[]).map(g =>
-    (['black','white','latino','asian'] as Ethnicity[]).map(e => ({
+  ),
+  ...genders.flatMap((g) =>
+    ethnicities.map((e) => ({
       id: `PRO_${g}_${e}`,
       archetype: 'PRO' as const,
-      gender: g, ethnicity: e,
-      label: `Instructor — ${g[0].upper()} / ${e}`
+      gender: g,
+      ethnicity: e,
+      label: makeLabel('Instructor', g, e),
     }))
-  );
+  ),
+];
