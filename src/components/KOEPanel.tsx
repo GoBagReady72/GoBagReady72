@@ -1,22 +1,26 @@
+
 // src/components/KOEPanel.tsx
 import { useMemo, useState } from 'react';
 import { runKOE } from '../koe/engine';
 import { RegionCoastal } from '../koe/regions.coastal';
 import { RegionWildfire } from '../koe/regions.wildfire';
 import { RegionWinter } from '../koe/regions.winter';
+import { RegionEarthquake } from '../koe/regions.earthquake';
 import type { InventoryItem, SimState } from '../koe/types';
 
 type KOEId =
   | 'early-evac' | 'shelter-in-place' | 'late-evac'
   | 'wf-early-evac' | 'wf-shelter-in-place' | 'wf-embers'
-  | 'ws-alert' | 'ws-outage' | 'ws-stranded';
+  | 'ws-alert' | 'ws-outage' | 'ws-stranded'
+  | 'eq-aftershock' | 'eq-outage' | 'eq-egress';
 
-type RegionKey = 'coastal' | 'wildfire' | 'winter';
+type RegionKey = 'coastal' | 'wildfire' | 'winter' | 'earthquake';
 
 const REGIONS = {
   coastal: RegionCoastal,
   wildfire: RegionWildfire,
   winter: RegionWinter,
+  earthquake: RegionEarthquake,
 } as const;
 
 export default function KOEPanel() {
@@ -102,10 +106,16 @@ export default function KOEPanel() {
           { id: 'wf-shelter-in-place', label: 'Wildfire Smoke — Shelter-in-Place' },
           { id: 'wf-embers', label: 'Wildfire — Wind Shift / Embers' },
         ]
-      : [
+      : regionKey === 'winter'
+      ? [
           { id: 'ws-alert', label: 'Winter — 24h Warning' },
           { id: 'ws-outage', label: 'Winter — Power Outage' },
           { id: 'ws-stranded', label: 'Winter — Stranded Vehicle' },
+        ]
+      : [
+          { id: 'eq-aftershock', label: 'Earthquake — Aftershock' },
+          { id: 'eq-outage', label: 'Earthquake — Citywide Outage' },
+          { id: 'eq-egress', label: 'Earthquake — Debris Egress' },
         ];
 
   return (
@@ -120,13 +130,17 @@ export default function KOEPanel() {
             onChange={(e) => {
               const val = e.target.value as RegionKey;
               setRegionKey(val);
-              setKoeId(val === 'coastal' ? 'early-evac' : val === 'wildfire' ? 'wf-early-evac' : 'ws-alert');
+              setKoeId(val === 'coastal' ? 'early-evac'
+                    : val === 'wildfire' ? 'wf-early-evac'
+                    : val === 'winter' ? 'ws-alert'
+                    : 'eq-aftershock');
             }}
             style={{ padding: '4px 6px' }}
           >
             <option value="coastal">Coastal (Hurricane/Storm Surge)</option>
             <option value="wildfire">Wildfire (Smoke / Evacuation)</option>
             <option value="winter">Winter Storm (Ice / Outage)</option>
+            <option value="earthquake">Urban Earthquake (Aftershock / Outage)</option>
           </select>
         </label>
 
