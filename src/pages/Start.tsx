@@ -1,6 +1,7 @@
 // src/pages/Start.tsx
+// Region → KOE selection page.
 import React, { useMemo, useState } from "react";
-import { REGIONS, REGION_BY_ID, type RegionId } from "@/config";
+import { REGIONS, REGION_BY_ID, type RegionId, type Region } from "@/config";
 import RegionCard from "@/components/RegionCard";
 import KOEConfirm from "@/components/KOEConfirm";
 import { postEvent } from "@/lib/telemetry";
@@ -15,16 +16,18 @@ export default function StartPage() {
     try {
       await postEvent({
         session_id: crypto.randomUUID(),
-        persona: "everyday_female",
+        persona: "everyday_female", // TODO: replace with actual persona state
         category: "region_select",
         outcome: "info",
         region: region.id,
         ko_event: region.kickoff.id,
         game_version: "r72-game v0.3.0"
       });
-    } catch {}
+    } catch {
+      // non-fatal
+    }
     setShowKOE(false);
-    alert(`Selected: ${region.name} – ${region.kickoff.title}`);
+    alert(`Selected: ${region.name} – ${region.kickoff.title}\n(Navigation to Store will be wired next step.)`);
   }
 
   return (
@@ -35,7 +38,7 @@ export default function StartPage() {
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
-        {REGIONS.map(r => (
+        {REGIONS.map((r: Region) => (
           <RegionCard key={r.id} region={r} selected={selected === r.id} onSelect={setSelected} />
         ))}
       </div>
@@ -45,15 +48,21 @@ export default function StartPage() {
           disabled={!selected}
           onClick={() => setShowKOE(true)}
           style={{
-            padding: "8px 12px", borderRadius: 8, border: "1px solid #111827",
+            padding: "8px 12px",
+            borderRadius: 8,
+            border: "1px solid #111827",
             background: selected ? "#111827" : "#e5e7eb",
-            color: selected ? "#fff" : "#9ca3af", cursor: selected ? "pointer" : "not-allowed",
+            color: selected ? "#fff" : "#9ca3af",
+            cursor: selected ? "pointer" : "not-allowed",
             fontWeight: 600
           }}
         >
           Review Kickoff Event
         </button>
-        <button onClick={() => setSelected(null)} style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #d1d5db", background: "#fff" }}>
+        <button
+          onClick={() => setSelected(null)}
+          style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #d1d5db", background: "#fff" }}
+        >
           Reset
         </button>
       </div>
