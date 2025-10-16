@@ -1,10 +1,13 @@
-// src/components/KOEPanel.tsx
+
+// Canon-aligned KOE Panel with Persona & MSS gauges
 import { useMemo, useState } from 'react';
 import { runKOE } from '../koe/engine';
 import { RegionCoastal } from '../koe/regions.coastal';
 import { RegionWildfire } from '../koe/regions.wildfire';
 import { RegionWinter } from '../koe/regions.winter';
 import { RegionEarthquake } from '../koe/regions.earthquake';
+import { PERSONAS, type Archetype } from '../core/personas';
+import { complianceWithEfficiency } from '../core/mss';
 import type { InventoryItem, SimState } from '../koe/types';
 
 type KOEId =
@@ -14,7 +17,6 @@ type KOEId =
   | 'eq-aftershock' | 'eq-outage' | 'eq-egress';
 
 type RegionKey = 'coastal' | 'wildfire' | 'winter' | 'earthquake';
-type PresetKey = 'everyday_female' | 'everyday_male' | 'family_infant' | 'senior';
 
 const REGIONS = {
   coastal: RegionCoastal,
@@ -81,79 +83,16 @@ const DEFAULT_INV: InvState = {
   radio: false,
 };
 
-function presetInventory(key: PresetKey): InvState {
-  // Cohort presets = pragmatic starting points for demos (not stereotypes).
-  switch (key) {
-    case 'everyday_female':
-      return {
-        ...DEFAULT_INV,
-        waterproof_boots: true,
-        respirator: true,
-        fuel_can: false,
-        radio: true,
-      };
-    case 'everyday_male':
-      return {
-        ...DEFAULT_INV,
-        waterproof_boots: true,
-        kcal_bar_2400: 2,
-        work_gloves: true,
-        respirator: true,
-        fuel_can: true,
-        shovel: true,
-        radio: true,
-      };
-    case 'family_infant':
-      return {
-        ...DEFAULT_INV,
-        bottled_water: 4,
-        kcal_bar_2400: 2,
-        wool_blanket: true,
-        work_gloves: true,
-        goggles: true,
-        respirator: true,
-        bleach: true,
-        fuel_can: true,
-        cooler: true,
-        ice_blocks: 2,
-        toilet_liners: 4,
-        camp_stove: true,
-        radio: true,
-      };
-    case 'senior':
-      return {
-        ...DEFAULT_INV,
-        bottled_water: 3,
-        wool_blanket: true,
-        goggles: true,
-        respirator: true,
-        fuel_can: false,
-        toilet_liners: 2,
-        radio: true,
-      };
-    default:
-      return DEFAULT_INV;
-  }
-}
-
 export default function KOEPanel() {
   const [regionKey, setRegionKey] = useState<RegionKey>('coastal');
   const [koeId, setKoeId] = useState<KOEId>('early-evac');
   const [seed, setSeed] = useState<number>(42);
 
-  const [preset, setPreset] = useState<PresetKey>('everyday_female');
+  const [archetype, setArchetype] = useState<Archetype>('EC'); // EC, PR, PRO
+  const persona = PERSONAS[archetype];
+
   const [inv, setInv] = useState<InvState>(DEFAULT_INV);
-
-  function applyPreset(p: PresetKey) {
-    setInv(presetInventory(p));
-  }
-  function resetDefault() {
-    setInv(DEFAULT_INV);
-  }
-
-  function setBool(key: keyof InvState, val: boolean) {
-    setInv(prev => ({ ...prev, [key]: val }));
-  }
+  function setBool(key: keyof InvState, val: boolean) { setInv(prev => ({ ...prev, [key]: val })); }
   function setQty(key: keyof InvState, val: number) {
     const n = Math.max(0, Math.floor(val || 0));
     setInv(prev => ({ ...prev, [key]: n }));
@@ -161,19 +100,23 @@ export default function KOEPanel() {
 
   const [state, setState] = useState<SimState | null>(null);
 
+  const inventory: InventoryItem[] = useMemo(() => buildInventory(inv), [inv]);
+  const bagLimitKg = Math.round(75 * persona.bagLimitPct) / 1; // assume 75 kg bodyweight avg baseline
+  const comp = complianceWithEfficiency(inventory, bagLimitKg);
+
   const initial: SimState = useMemo(() => ({
     minute: 0,
     hydration: 60,
     calories: 1800,
-    morale: 60,
+    morale: 60 + Math.round(persona.moraleSlope * 10), // small bias
     roadAccess: 0,
     cellService: 0,
     airQuality: 0,
-    encumbrance: 0,
-    inventory: buildInventory(inv),
+    encumbrance: Math.max(0, Math.round(((comp.weightKg / Math.max(1, bagLimitKg)) - 1) * 10)), // 0..
+    inventory,
     log: [],
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [JSON.stringify(inv)]);
+  }), [JSON.stringify(inventory), archetype]);
 
   function onRun() {
     try {
@@ -242,14 +185,17 @@ export default function KOEPanel() {
 
         <label style={{ fontSize: 14 }}>
           KOE:&nbsp;
-          <select
-            value={koeId}
-            onChange={(e) => setKoeId(e.target.value as KOEId)}
-            style={{ padding: '4px 6px' }}
-          >
-            {koeOptions.map(k => (
-              <option key={k.id} value={k.id as any}>{k.label}</option>
-            ))}
+          <select value={koeId} onChange={(e) => setKoeId(e.target.value as KOEId)} style={{ padding: '4px 6px' }}>
+            {koeOptions.map(k => (<option key={k.id} value={k.id as any}>{k.label}</option>))}
+          </select>
+        </label>
+
+        <label style={{ fontSize: 14 }}>
+          Persona:&nbsp;
+          <select value={archetype} onChange={(e) => setArchetype(e.target.value as Archetype)} style={{ padding: '4px 6px' }}>
+            <option value="EC">Everyday Civilian</option>
+            <option value="PR">Prepper</option>
+            <option value="PRO">Instructor (Unlock)</option>
           </select>
         </label>
 
@@ -266,23 +212,12 @@ export default function KOEPanel() {
         <button onClick={onRun}>Run</button>
       </div>
 
-      {/* Presets */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
-        <label style={{ fontSize: 14 }}>
-          Preset:&nbsp;
-          <select
-            value={preset}
-            onChange={(e) => setPreset(e.target.value as PresetKey)}
-            style={{ padding: '4px 6px' }}
-          >
-            <option value="everyday_female">Everyday Female</option>
-            <option value="everyday_male">Everyday Male</option>
-            <option value="family_infant">Family w/ Infant</option>
-            <option value="senior">Senior</option>
-          </select>
-        </label>
-        <button onClick={() => applyPreset(preset)}>Apply Preset</button>
-        <button onClick={resetDefault}>Reset</button>
+      {/* MSS & Weight Gauges */}
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
+        <Gauge label="MSS Compliance" value={comp.mssPercent} suffix="%" />
+        <Gauge label="Efficiency (overpack penalty)" value={comp.efficiency} suffix="%" />
+        <Gauge label="Pack Weight" value={comp.weightKg} suffix=" kg" />
+        <Gauge label="Bag Limit" value={bagLimitKg} suffix=" kg" />
       </div>
 
       {/* Inventory Editor */}
@@ -355,8 +290,23 @@ export default function KOEPanel() {
         </div>
       )}
 
+      {/* Debrief */}
+      {state && (
+        <div style={{ borderTop: '1px solid #333', paddingTop: 10, marginTop: 12 }}>
+          <h3 style={{ margin: '6px 0 8px 0' }}>Debrief — MSS & Readiness</h3>
+          <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.5 }}>
+            <li><b>MSS Compliance:</b> {comp.mssPercent}%</li>
+            <li><b>Efficiency Score:</b> {comp.efficiency}% (penalizes overpacking)</li>
+            <li><b>Pack Weight:</b> {comp.weightKg} kg vs. <b>Limit:</b> {bagLimitKg} kg (persona {persona.name})</li>
+          </ul>
+          <div style={{ opacity: 0.8, fontSize: 13, marginTop: 6 }}>
+            MSS is the all-hazards standard: balanced categories often beat raw quantity. Tune your kit until MSS% rises without pushing weight far above limit.
+          </div>
+        </div>
+      )}
+
       {/* Log */}
-      <div>
+      <div style={{ marginTop: 12 }}>
         <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Event Log</div>
         <pre
           style={{
@@ -370,7 +320,7 @@ export default function KOEPanel() {
             margin: 0,
           }}
         >
-{state?.log?.length ? state.log.join('\n') : 'Choose a Region & KOE, set or apply a Preset, then Run.'}
+{state?.log?.length ? state.log.join('\n') : 'Choose Region, KOE, Persona, adjust inventory, then Run.'}
         </pre>
       </div>
     </div>
@@ -420,6 +370,15 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div style={{ padding: 8, border: '1px solid #333', borderRadius: 6 }}>
       <div style={{ fontSize: 11, opacity: 0.7 }}>{label}</div>
       <div style={{ fontWeight: 600 }}>{value}</div>
+    </div>
+  );
+}
+
+function Gauge({ label, value, suffix }: { label: string; value: number; suffix?: string }) {
+  return (
+    <div style={{ padding: 8, border: '1px solid #333', borderRadius: 6, minWidth: 160 }}>
+      <div style={{ fontSize: 11, opacity: 0.7 }}>{label}</div>
+      <div style={{ fontWeight: 700, fontSize: 16 }}>{value}{suffix || ''}</div>
     </div>
   );
 }
