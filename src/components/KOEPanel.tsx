@@ -152,3 +152,109 @@ export default function KOEPanel() {
           <Stat label="Outcome" value={state.outcome?.toUpperCase() || '—'} />
           <Stat label="Hydration" value={String(state.hydration)} />
           <Stat label="Calories" value={String(state.calories)} />
+          <Stat label="Morale" value={String(state.morale)} />
+          <Stat label="Road" value={String(state.roadAccess)} />
+          <Stat label="Cell" value={String(state.cellService)} />
+        </div>
+      )}
+
+      {/* Log */}
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Event Log</div>
+        <pre
+          style={{
+            whiteSpace: 'pre-wrap',
+            background: '#0f0f0f',
+            color: '#eaeaea',
+            padding: 12,
+            borderRadius: 8,
+            minHeight: 180,
+            border: '1px solid #333',
+            margin: 0,
+          }}
+        >
+{state?.log?.length ? state.log.join('\n') : 'Set inventory, choose a KOE, and press Run.'}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+// ---------- UI helpers ----------
+function Group(props: { title: string; children: any }) {
+  return (
+    <div style={{ border: '1px solid #333', borderRadius: 8, padding: 10 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 0.4, opacity: 0.85, marginBottom: 8 }}>
+        {props.title}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 6 }}>
+        {props.children}
+      </div>
+    </div>
+  );
+}
+
+function Check(props: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+      <input type="checkbox" checked={props.checked} onChange={(e) => props.onChange(e.target.checked)} />
+      <span>{props.label}</span>
+    </label>
+  );
+}
+
+function Qty(props: { label: string; value: number; onChange: (n: number) => void }) {
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+    <span>{props.label}</span>
+      <input
+        type="number"
+        min={0}
+        value={props.value}
+        onChange={(e) => props.onChange(Number(e.target.value || 0))}
+        style={{ width: 90, padding: '2px 6px' }}
+      />
+    </label>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ padding: 8, border: '1px solid #333', borderRadius: 6 }}>
+      <div style={{ fontSize: 11, opacity: 0.7 }}>{label}</div>
+      <div style={{ fontWeight: 600 }}>{value}</div>
+    </div>
+  );
+}
+
+// ---------- builder ----------
+function buildInventory(inv: {
+  water_filter: boolean; bottled_water: number; kcal_bar_2400: number; tarp: boolean; insulation_layer: boolean;
+  offline_maps: boolean; fuel_can: boolean; waterproof_boots: boolean; work_gloves: boolean; goggles: boolean;
+  cooler: boolean; ice_blocks: number; bleach: boolean; toilet_liners: number;
+}): InventoryItem[] {
+  const items: InventoryItem[] = [];
+
+  if (inv.water_filter) items.push({ id: 'water_filter', category: 'WATER', qty: 1 });
+  if (inv.bottled_water > 0) items.push({ id: 'bottled_water', category: 'WATER', qty: inv.bottled_water });
+
+  if (inv.kcal_bar_2400 > 0) items.push({ id: '2400kcal_bar', category: 'FOOD', qty: inv.kcal_bar_2400 });
+
+  if (inv.insulation_layer) items.push({ id: 'insulation_layer', category: 'CLOTHING', qty: 1 });
+  if (inv.waterproof_boots) items.push({ id: 'waterproof_boots', category: 'CLOTHING', qty: 1 });
+
+  if (inv.tarp) items.push({ id: 'tarp', category: 'SHELTER', qty: 1 });
+
+  if (inv.offline_maps) items.push({ id: 'offline_maps', category: 'COMMS_NAV', qty: 1 });
+
+  if (inv.work_gloves) items.push({ id: 'work_gloves', category: 'HEALTH', qty: 1 });
+  if (inv.goggles) items.push({ id: 'goggles', category: 'HEALTH', qty: 1 });
+  if (inv.bleach) items.push({ id: 'bleach', category: 'HEALTH', qty: 1 });
+
+  if (inv.fuel_can) items.push({ id: 'fuel_can', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.cooler) items.push({ id: 'cooler', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.ice_blocks > 0) items.push({ id: 'ice_blocks', category: 'SUSTAINABILITY', qty: inv.ice_blocks });
+  if (inv.toilet_liners > 0) items.push({ id: 'toilet_liners', category: 'SUSTAINABILITY', qty: inv.toilet_liners });
+
+  return items;
+}
