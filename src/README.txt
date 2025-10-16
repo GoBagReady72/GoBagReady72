@@ -1,15 +1,14 @@
-Ready72 Wireframes v0.7.2 — Play Again Loop Patch
--------------------------------------------------
-Feature:
-- Adds proper reset logic after Debrief so "Play again" resets stats and restarts smoothly.
-- Keeps current persona (or randomizes if you change resetGame(false)).
+✅ GoBag: Ready72 — IntroStart Fix (v0.7.2-hotpatch)
+--------------------------------------------------
+This patch ensures the game starts at the **Intro/Title** screen instead of the persona cards.
 
-To apply (GitHub web UI, no CLI needed):
-1) In your repo, open /src/
-2) Upload this new App.tsx (overwrite existing)
-3) Upload Ready72WireframesV072Patch.tsx (keep next to existing wireframes)
-4) Commit to main
-5) Deploy as usual on Vercel
+1️⃣ Upload both files into your /src folder:
+    • App.tsx  (overwrite existing)
+    • Ready72WireframesV071.tsx (overwrite existing)
 
-Test:
-- Finish a run → Debrief → click "Play again" → should return cleanly to Persona selection with reset values.
+2️⃣ Commit directly to main on GitHub.
+
+3️⃣ Vercel will auto-deploy.
+
+After deployment, the game will start at the Intro/Title screen.
+Click “Begin HazAssist Briefing” to reach the persona cards.
