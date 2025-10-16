@@ -1,0 +1,2 @@
+ready72-game v0.3 Region/KOE/Telemetry scaffold
+Created: 2025-10-16T01:16:25.408845
