@@ -1,32 +1,49 @@
+
 // src/components/KOEPanel.tsx
 import { useMemo, useState } from 'react';
 import { runKOE } from '../koe/engine';
 import { RegionCoastal } from '../koe/regions.coastal';
+import { RegionWildfire } from '../koe/regions.wildfire';
 import type { InventoryItem, SimState } from '../koe/types';
 
-type KOEId = 'early-evac' | 'shelter-in-place' | 'late-evac';
+type KOEId =
+  | 'early-evac' | 'shelter-in-place' | 'late-evac'
+  | 'wf-early-evac' | 'wf-shelter-in-place' | 'wf-embers';
+
+type RegionKey = 'coastal' | 'wildfire';
+
+const REGIONS = {
+  coastal: RegionCoastal,
+  wildfire: RegionWildfire,
+} as const;
 
 export default function KOEPanel() {
-  // --- Seed & KOE selection
-  const [seed, setSeed] = useState<number>(42);
+  const [regionKey, setRegionKey] = useState<RegionKey>('coastal');
   const [koeId, setKoeId] = useState<KOEId>('early-evac');
+  const [seed, setSeed] = useState<number>(42);
 
-  // --- Inventory controls (only items referenced by the Coastal region KOEs)
   const [inv, setInv] = useState({
     water_filter: true,
-    bottled_water: 2,        // qty
-    kcal_bar_2400: 1,        // qty
-    tarp: true,
+    bottled_water: 2,
+    kcal_bar_2400: 1,
     insulation_layer: true,
-    offline_maps: true,
-    fuel_can: true,
     waterproof_boots: false,
+    wool_blanket: false,
+    tarp: true,
+    offline_maps: true,
     work_gloves: false,
     goggles: false,
-    cooler: false,
-    ice_blocks: 0,           // qty
+    respirator: false,
     bleach: false,
-    toilet_liners: 0,        // qty
+    fuel_can: true,
+    cooler: false,
+    ice_blocks: 0,
+    toilet_liners: 0,
+    headlamp: true,
+    battery_bank: true,
+    go_bag: true,
+    box_fan: false,
+    furnace_filters: 0,
   });
 
   function setBool(key: keyof typeof inv, val: boolean) {
@@ -37,10 +54,8 @@ export default function KOEPanel() {
     setInv(prev => ({ ...prev, [key]: n }));
   }
 
-  // --- Run state
   const [state, setState] = useState<SimState | null>(null);
 
-  // Build SimState from UI each run (keeps single-file change)
   const initial: SimState = useMemo(() => ({
     minute: 0,
     hydration: 60,
@@ -53,11 +68,12 @@ export default function KOEPanel() {
     inventory: buildInventory(inv),
     log: [],
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [JSON.stringify(inv)]); // stringify to avoid deep deps complexity
+  }), [JSON.stringify(inv)]);
 
   function onRun() {
     try {
-      const result = runKOE(RegionCoastal, koeId, initial, { seed, maxMinutes: 8 * 60 });
+      const region = REGIONS[regionKey];
+      const result = runKOE(region, koeId, initial, { seed, maxMinutes: 8 * 60 });
       setState(result);
     } catch (e) {
       console.error(e);
@@ -65,12 +81,39 @@ export default function KOEPanel() {
     }
   }
 
+  const koeOptions = regionKey === 'coastal'
+    ? [
+        { id: 'early-evac', label: 'Early Evacuation' },
+        { id: 'shelter-in-place', label: 'Shelter-in-Place' },
+        { id: 'late-evac', label: 'Late Evacuation (During Storm)' },
+      ]
+    : [
+        { id: 'wf-early-evac', label: 'Wildfire — Early Evac' },
+        { id: 'wf-shelter-in-place', label: 'Wildfire Smoke — Shelter-in-Place' },
+        { id: 'wf-embers', label: 'Wildfire — Wind Shift / Embers' },
+      ];
+
   return (
     <div style={{ padding: 16, border: '1px solid #222', borderRadius: 8 }}>
-      <h2 style={{ marginTop: 0 }}>KOE Simulator — {RegionCoastal.name}</h2>
+      <h2 style={{ marginTop: 0 }}>KOE Simulator — {REGIONS[regionKey].name}</h2>
 
-      {/* Controls */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
+        <label style={{ fontSize: 14 }}>
+          Region:&nbsp;
+          <select
+            value={regionKey}
+            onChange={(e) => {
+              const val = e.target.value as RegionKey;
+              setRegionKey(val);
+              setKoeId(val === 'coastal' ? 'early-evac' : 'wf-early-evac');
+            }}
+            style={{ padding: '4px 6px' }}
+          >
+            <option value="coastal">Coastal (Hurricane/Storm Surge)</option>
+            <option value="wildfire">Wildfire (Smoke / Evacuation)</option>
+          </select>
+        </label>
+
         <label style={{ fontSize: 14 }}>
           KOE:&nbsp;
           <select
@@ -78,9 +121,9 @@ export default function KOEPanel() {
             onChange={(e) => setKoeId(e.target.value as KOEId)}
             style={{ padding: '4px 6px' }}
           >
-            <option value="early-evac">Early Evacuation</option>
-            <option value="shelter-in-place">Shelter-in-Place</option>
-            <option value="late-evac">Late Evacuation (During Storm)</option>
+            {koeOptions.map(k => (
+              <option key={k.id} value={k.id as any}>{k.label}</option>
+            ))}
           </select>
         </label>
 
@@ -97,7 +140,6 @@ export default function KOEPanel() {
         <button onClick={onRun}>Run</button>
       </div>
 
-      {/* Inventory Editor */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Inventory (MSS-aligned)</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
@@ -113,6 +155,7 @@ export default function KOEPanel() {
           <Group title="CLOTHING">
             <Check label="Insulation Layer" checked={inv.insulation_layer} onChange={(v) => setBool('insulation_layer', v)} />
             <Check label="Waterproof Boots" checked={inv.waterproof_boots} onChange={(v) => setBool('waterproof_boots', v)} />
+            <Check label="Wool Blanket" checked={inv.wool_blanket} onChange={(v) => setBool('wool_blanket', v)} />
           </Group>
 
           <Group title="SHELTER">
@@ -123,9 +166,10 @@ export default function KOEPanel() {
             <Check label="Offline Maps" checked={inv.offline_maps} onChange={(v) => setBool('offline_maps', v)} />
           </Group>
 
-          <Group title="HEALTH">
+          <Group title="HEALTH / PPE">
             <Check label="Work Gloves" checked={inv.work_gloves} onChange={(v) => setBool('work_gloves', v)} />
             <Check label="Goggles" checked={inv.goggles} onChange={(v) => setBool('goggles', v)} />
+            <Check label="Respirator (N95/P100)" checked={inv.respirator} onChange={(v) => setBool('respirator', v)} />
             <Check label="Bleach" checked={inv.bleach} onChange={(v) => setBool('bleach', v)} />
           </Group>
 
@@ -134,11 +178,18 @@ export default function KOEPanel() {
             <Check label="Cooler" checked={inv.cooler} onChange={(v) => setBool('cooler', v)} />
             <Qty label="Ice Blocks (qty)" value={inv.ice_blocks} onChange={(n) => setQty('ice_blocks', n)} />
             <Qty label="Toilet Liners (qty)" value={inv.toilet_liners} onChange={(n) => setQty('toilet_liners', n)} />
+            <Check label="Headlamp" checked={inv.headlamp} onChange={(v) => setBool('headlamp', v)} />
+            <Check label="Battery Bank" checked={inv.battery_bank} onChange={(v) => setBool('battery_bank', v)} />
+          </Group>
+
+          <Group title="SPECIAL / PREP">
+            <Check label="Go-Bag Packed" checked={inv.go_bag} onChange={(v) => setBool('go_bag', v)} />
+            <Check label="Box Fan" checked={inv.box_fan} onChange={(v) => setBool('box_fan', v)} />
+            <Qty label="Furnace Filters (qty)" value={inv.furnace_filters} onChange={(n) => setQty('furnace_filters', n)} />
           </Group>
         </div>
       </div>
 
-      {/* HUD */}
       {state && (
         <div
           style={{
@@ -158,7 +209,6 @@ export default function KOEPanel() {
         </div>
       )}
 
-      {/* Log */}
       <div>
         <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Event Log</div>
         <pre
@@ -173,7 +223,7 @@ export default function KOEPanel() {
             margin: 0,
           }}
         >
-{state?.log?.length ? state.log.join('\n') : 'Set inventory, choose a KOE, and press Run.'}
+{state?.log?.length ? state.log.join('\n') : 'Choose a Region & KOE, set inventory, then Run.'}
         </pre>
       </div>
     </div>
@@ -230,8 +280,9 @@ function Stat({ label, value }: { label: string; value: string }) {
 // ---------- builder ----------
 function buildInventory(inv: {
   water_filter: boolean; bottled_water: number; kcal_bar_2400: number; tarp: boolean; insulation_layer: boolean;
-  offline_maps: boolean; fuel_can: boolean; waterproof_boots: boolean; work_gloves: boolean; goggles: boolean;
-  cooler: boolean; ice_blocks: number; bleach: boolean; toilet_liners: number;
+  waterproof_boots: boolean; wool_blanket: boolean; offline_maps: boolean; work_gloves: boolean; goggles: boolean;
+  respirator: boolean; bleach: boolean; fuel_can: boolean; cooler: boolean; ice_blocks: number;
+  toilet_liners: number; headlamp: boolean; battery_bank: boolean; go_bag: boolean; box_fan: boolean; furnace_filters: number;
 }): InventoryItem[] {
   const items: InventoryItem[] = [];
 
@@ -242,6 +293,7 @@ function buildInventory(inv: {
 
   if (inv.insulation_layer) items.push({ id: 'insulation_layer', category: 'CLOTHING', qty: 1 });
   if (inv.waterproof_boots) items.push({ id: 'waterproof_boots', category: 'CLOTHING', qty: 1 });
+  if (inv.wool_blanket) items.push({ id: 'wool_blanket', category: 'CLOTHING', qty: 1 });
 
   if (inv.tarp) items.push({ id: 'tarp', category: 'SHELTER', qty: 1 });
 
@@ -249,12 +301,19 @@ function buildInventory(inv: {
 
   if (inv.work_gloves) items.push({ id: 'work_gloves', category: 'HEALTH', qty: 1 });
   if (inv.goggles) items.push({ id: 'goggles', category: 'HEALTH', qty: 1 });
+  if (inv.respirator) items.push({ id: 'respirator', category: 'HEALTH', qty: 1 });
   if (inv.bleach) items.push({ id: 'bleach', category: 'HEALTH', qty: 1 });
 
   if (inv.fuel_can) items.push({ id: 'fuel_can', category: 'SUSTAINABILITY', qty: 1 });
   if (inv.cooler) items.push({ id: 'cooler', category: 'SUSTAINABILITY', qty: 1 });
   if (inv.ice_blocks > 0) items.push({ id: 'ice_blocks', category: 'SUSTAINABILITY', qty: inv.ice_blocks });
   if (inv.toilet_liners > 0) items.push({ id: 'toilet_liners', category: 'SUSTAINABILITY', qty: inv.toilet_liners });
+  if (inv.headlamp) items.push({ id: 'headlamp', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.battery_bank) items.push({ id: 'battery_bank', category: 'SUSTAINABILITY', qty: 1 });
+
+  if (inv.go_bag) items.push({ id: 'go_bag', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.box_fan) items.push({ id: 'box_fan', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.furnace_filters > 0) items.push({ id: 'furnace_filters', category: 'HEALTH', qty: inv.furnace_filters });
 
   return items;
 }
