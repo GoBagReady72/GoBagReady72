@@ -1,20 +1,15 @@
-Ready72 Wireframes v0.7.1 — Persona Card Visibility Hotfix
-----------------------------------------------------------
-Fixes:
-- Persona cards now have higher-contrast text and always render.
-- Defensive defaults prevent "empty screen" if state is unset.
-- Matches HazAssist color scheme more closely.
+Ready72 Wireframes v0.7.2 — Play Again Loop Patch
+-------------------------------------------------
+Feature:
+- Adds proper reset logic after Debrief so "Play again" resets stats and restarts smoothly.
+- Keeps current persona (or randomizes if you change resetGame(false)).
 
-Files:
-- Ready72WireframesV071.tsx  (Scenes 0–5, hotfix)
-- App.tsx                    (mounts v0.7.1 as live app)
-
-Apply (GitHub web UI):
+To apply (GitHub web UI, no CLI needed):
 1) In your repo, open /src/
-2) Upload both files (overwrite App.tsx)
-3) Commit to main
-4) Verify at https://beta.gobagready72.com/
+2) Upload this new App.tsx (overwrite existing)
+3) Upload Ready72WireframesV072Patch.tsx (keep next to existing wireframes)
+4) Commit to main
+5) Deploy as usual on Vercel
 
-If you still see issues:
-- Hard refresh (Ctrl/Cmd+Shift+R) to bust browser cache.
-- Remove older wireframe files (e.g., V042) from /src/ to avoid TS collisions.
+Test:
+- Finish a run → Debrief → click "Play again" → should return cleanly to Persona selection with reset values.
