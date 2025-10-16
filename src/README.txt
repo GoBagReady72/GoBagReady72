@@ -1,15 +1,18 @@
-Ready72 Wireframes v0.6 — Adds Scene 4 (Decision Loop, 4-hour ticks)
---------------------------------------------------------------------
-This package extends the live wireframes with the Decision Loop screen.
-- Deterministic hazards via a seeded RNG (default seed 42)
-- Actions: Move (easy/normal/fast), Rest, Ration, Divert
-- Real-time updates: time, distance, hydration, calories, morale
-- Event Log with HazAssist-styled notes
-- Flow: Intro → Persona → Briefing → Store → Decision
+Ready72 Wireframes v0.7 — Adds Scene 5 (Debrief)
+------------------------------------------------
+This package completes the first playable loop:
+Intro → Persona → Briefing → Store → Decision → Debrief
+
+Debrief features:
+- Outcome badge (WIN/LOSS)
+- MSS Report Card by category (Water, Food, Shelter, Health, Comms, Sustainability, Special)
+- Average MSS %, heuristic FRS outcome (Thrived/Recovered/Survived/At risk)
+- Key Events excerpt from the Decision loop
+- Reflection prompts and CTAs (Play again / Open HazAssist Dashboard placeholder)
 
 Files:
-- Ready72WireframesV060.tsx  (Scenes 0–4)
-- App.tsx                    (mounts v0.6 as live app)
+- Ready72WireframesV070.tsx  (Scenes 0–5)
+- App.tsx                    (mounts v0.7 as live app)
 
 Apply (GitHub web UI):
 1) In your repo, open /src/
@@ -17,6 +20,6 @@ Apply (GitHub web UI):
 3) Commit to main
 4) Verify at https://beta.gobagready72.com/
 
-Rollback:
-- Revert App.tsx from history or restore previous App.tsx
-- You may keep Ready72WireframesV060.tsx for future iterations
+Note:
+If older wireframe files remain in /src/ (e.g., V042), delete or move them out of /src/
+to avoid TypeScript build errors.
