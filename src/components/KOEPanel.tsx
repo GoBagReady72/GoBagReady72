@@ -4,17 +4,20 @@ import { useMemo, useState } from 'react';
 import { runKOE } from '../koe/engine';
 import { RegionCoastal } from '../koe/regions.coastal';
 import { RegionWildfire } from '../koe/regions.wildfire';
+import { RegionWinter } from '../koe/regions.winter';
 import type { InventoryItem, SimState } from '../koe/types';
 
 type KOEId =
   | 'early-evac' | 'shelter-in-place' | 'late-evac'
-  | 'wf-early-evac' | 'wf-shelter-in-place' | 'wf-embers';
+  | 'wf-early-evac' | 'wf-shelter-in-place' | 'wf-embers'
+  | 'ws-alert' | 'ws-outage' | 'ws-stranded';
 
-type RegionKey = 'coastal' | 'wildfire';
+type RegionKey = 'coastal' | 'wildfire' | 'winter';
 
 const REGIONS = {
   coastal: RegionCoastal,
   wildfire: RegionWildfire,
+  winter: RegionWinter,
 } as const;
 
 export default function KOEPanel() {
@@ -44,6 +47,12 @@ export default function KOEPanel() {
     go_bag: true,
     box_fan: false,
     furnace_filters: 0,
+    // winter-specific
+    propane_heater: false,
+    tire_chains: false,
+    shovel: false,
+    camp_stove: false,
+    radio: false,
   });
 
   function setBool(key: keyof typeof inv, val: boolean) {
@@ -81,17 +90,24 @@ export default function KOEPanel() {
     }
   }
 
-  const koeOptions = regionKey === 'coastal'
-    ? [
-        { id: 'early-evac', label: 'Early Evacuation' },
-        { id: 'shelter-in-place', label: 'Shelter-in-Place' },
-        { id: 'late-evac', label: 'Late Evacuation (During Storm)' },
-      ]
-    : [
-        { id: 'wf-early-evac', label: 'Wildfire — Early Evac' },
-        { id: 'wf-shelter-in-place', label: 'Wildfire Smoke — Shelter-in-Place' },
-        { id: 'wf-embers', label: 'Wildfire — Wind Shift / Embers' },
-      ];
+  const koeOptions =
+    regionKey === 'coastal'
+      ? [
+          { id: 'early-evac', label: 'Early Evacuation' },
+          { id: 'shelter-in-place', label: 'Shelter-in-Place' },
+          { id: 'late-evac', label: 'Late Evacuation (During Storm)' },
+        ]
+      : regionKey === 'wildfire'
+      ? [
+          { id: 'wf-early-evac', label: 'Wildfire — Early Evac' },
+          { id: 'wf-shelter-in-place', label: 'Wildfire Smoke — Shelter-in-Place' },
+          { id: 'wf-embers', label: 'Wildfire — Wind Shift / Embers' },
+        ]
+      : [
+          { id: 'ws-alert', label: 'Winter — 24h Warning' },
+          { id: 'ws-outage', label: 'Winter — Power Outage' },
+          { id: 'ws-stranded', label: 'Winter — Stranded Vehicle' },
+        ];
 
   return (
     <div style={{ padding: 16, border: '1px solid #222', borderRadius: 8 }}>
@@ -105,12 +121,13 @@ export default function KOEPanel() {
             onChange={(e) => {
               const val = e.target.value as RegionKey;
               setRegionKey(val);
-              setKoeId(val === 'coastal' ? 'early-evac' : 'wf-early-evac');
+              setKoeId(val === 'coastal' ? 'early-evac' : val === 'wildfire' ? 'wf-early-evac' : 'ws-alert');
             }}
             style={{ padding: '4px 6px' }}
           >
             <option value="coastal">Coastal (Hurricane/Storm Surge)</option>
             <option value="wildfire">Wildfire (Smoke / Evacuation)</option>
+            <option value="winter">Winter Storm (Ice / Outage)</option>
           </select>
         </label>
 
@@ -118,7 +135,7 @@ export default function KOEPanel() {
           KOE:&nbsp;
           <select
             value={koeId}
-            onChange={(e) => setKoeId(e.target.value as KOEId)}
+            onChange={(e) => setKoeId(e.target.value as KOeId)}
             style={{ padding: '4px 6px' }}
           >
             {koeOptions.map(k => (
@@ -164,6 +181,7 @@ export default function KOEPanel() {
 
           <Group title="COMMS & NAV">
             <Check label="Offline Maps" checked={inv.offline_maps} onChange={(v) => setBool('offline_maps', v)} />
+            <Check label="Radio (hand-crank)" checked={inv.radio} onChange={(v) => setBool('radio', v)} />
           </Group>
 
           <Group title="HEALTH / PPE">
@@ -180,12 +198,10 @@ export default function KOEPanel() {
             <Qty label="Toilet Liners (qty)" value={inv.toilet_liners} onChange={(n) => setQty('toilet_liners', n)} />
             <Check label="Headlamp" checked={inv.headlamp} onChange={(v) => setBool('headlamp', v)} />
             <Check label="Battery Bank" checked={inv.battery_bank} onChange={(v) => setBool('battery_bank', v)} />
-          </Group>
-
-          <Group title="SPECIAL / PREP">
-            <Check label="Go-Bag Packed" checked={inv.go_bag} onChange={(v) => setBool('go_bag', v)} />
-            <Check label="Box Fan" checked={inv.box_fan} onChange={(v) => setBool('box_fan', v)} />
-            <Qty label="Furnace Filters (qty)" value={inv.furnace_filters} onChange={(n) => setQty('furnace_filters', n)} />
+            <Check label="Propane Heater" checked={inv.propane_heater} onChange={(v) => setBool('propane_heater', v)} />
+            <Check label="Tire Chains" checked={inv.tire_chains} onChange={(v) => setBool('tire_chains', v)} />
+            <Check label="Shovel" checked={inv.shovel} onChange={(v) => setBool('shovel', v)} />
+            <Check label="Camp Stove" checked={inv.camp_stove} onChange={(v) => setBool('camp_stove', v)} />
           </Group>
         </div>
       </div>
@@ -278,12 +294,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 // ---------- builder ----------
-function buildInventory(inv: {
-  water_filter: boolean; bottled_water: number; kcal_bar_2400: number; tarp: boolean; insulation_layer: boolean;
-  waterproof_boots: boolean; wool_blanket: boolean; offline_maps: boolean; work_gloves: boolean; goggles: boolean;
-  respirator: boolean; bleach: boolean; fuel_can: boolean; cooler: boolean; ice_blocks: number;
-  toilet_liners: number; headlamp: boolean; battery_bank: boolean; go_bag: boolean; box_fan: boolean; furnace_filters: number;
-}): InventoryItem[] {
+function buildInventory(inv: any): InventoryItem[] {
   const items: InventoryItem[] = [];
 
   if (inv.water_filter) items.push({ id: 'water_filter', category: 'WATER', qty: 1 });
@@ -298,6 +309,7 @@ function buildInventory(inv: {
   if (inv.tarp) items.push({ id: 'tarp', category: 'SHELTER', qty: 1 });
 
   if (inv.offline_maps) items.push({ id: 'offline_maps', category: 'COMMS_NAV', qty: 1 });
+  if (inv.radio) items.push({ id: 'radio', category: 'COMMS_NAV', qty: 1 });
 
   if (inv.work_gloves) items.push({ id: 'work_gloves', category: 'HEALTH', qty: 1 });
   if (inv.goggles) items.push({ id: 'goggles', category: 'HEALTH', qty: 1 });
@@ -310,6 +322,10 @@ function buildInventory(inv: {
   if (inv.toilet_liners > 0) items.push({ id: 'toilet_liners', category: 'SUSTAINABILITY', qty: inv.toilet_liners });
   if (inv.headlamp) items.push({ id: 'headlamp', category: 'SUSTAINABILITY', qty: 1 });
   if (inv.battery_bank) items.push({ id: 'battery_bank', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.propane_heater) items.push({ id: 'propane_heater', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.tire_chains) items.push({ id: 'tire_chains', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.shovel) items.push({ id: 'shovel', category: 'SUSTAINABILITY', qty: 1 });
+  if (inv.camp_stove) items.push({ id: 'camp_stove', category: 'SUSTAINABILITY', qty: 1 });
 
   if (inv.go_bag) items.push({ id: 'go_bag', category: 'SUSTAINABILITY', qty: 1 });
   if (inv.box_fan) items.push({ id: 'box_fan', category: 'SUSTAINABILITY', qty: 1 });
