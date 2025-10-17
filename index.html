@@ -3,10 +3,116 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ready72 — WF01</title>
+    <title>Ready72 — WF01 Live Canvas</title>
+    <style>
+      :root {
+        --bg: #0f1720;
+        --panel: #121a23;
+        --border: #233042;
+        --text: #e8eef6;
+        --muted: #b1c2d6;
+        --accent: #ff8a1f;
+        --pill: #1d2a3a;
+        --pill-border: #2a3a50;
+        --grad-start: #24d072;
+        --grad-mid: #fbbf24;
+        --grad-end: #f87171;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+      }
+      .container { max-width: 1240px; margin: 18px auto 48px; padding: 0 20px; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+      .nav-pills { display: flex; gap: 10px; overflow: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; }
+      .nav-pills > * { scroll-snap-align: start; }
+      .pill {
+        background: #162130;
+        color: var(--text);
+        border: 1px solid var(--pill-border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        min-width: 88px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+      }
+      .pill:hover { background: var(--accent); color: #0b0b0b; border-color: #c97313; transform: translateY(-1px); }
+      .pill.active { background: var(--accent); color: #0b0b0b; border-color: #c97313; box-shadow: 0 0 0 1px #c97313 inset; }
+      .brand { color: #f59e0b; font-weight: 600; margin: 18px 0 8px; }
+      .brand .brand-white { color: #ffffff; }
+      .hr { height: 1px; background: var(--border); margin: 14px 0 18px; }
+      .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) 360px; gap: 24px; }
+      .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+      h1 { margin: 0 0 12px; font-size: 28px; }
+      .lead { color: var(--muted); margin-bottom: 16px; line-height: 1.55; }
+      .progress-wrap { background: #0e1620; border: 1px solid var(--border); border-radius: 8px; height: 10px; overflow: hidden; margin: 12px 0 16px; }
+      .progress { height: 100%; background: linear-gradient(90deg, var(--grad-start) 0%, var(--grad-mid) 50%, var(--grad-end) 100%); width: 100%; }
+      ul.bullets { margin: 0 0 14px 16px; }
+      ul.bullets li { margin: 8px 0; }
+      .actions { display: flex; gap: 12px; margin-top: 10px; }
+      .btn { border-radius: 8px; padding: 8px 14px; border: 1px solid var(--border); background: #162130; color: var(--text); font-weight: 600; font-size: 14px; cursor: pointer; }
+      .btn.primary { background: var(--accent); color: #0b0b0b; border-color: #c97313; }
+
+      /* System Advisor Styling - match main card */
+      .advisor { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; justify-content: flex-start; }
+      .advisor h3 { margin: 0 0 10px; color: var(--muted); font-size: 13px; letter-spacing: 0.03em; font-weight: 600; }
+      .advisor .msg { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; background: #121a23; color: var(--text); font-size: 13px; line-height: 1.4; }
+      .advisor .msg:last-child { margin-bottom: 0; }
+
+      @media (max-width: 980px) {
+        .layout { grid-template-columns: 1fr; }
+        .advisor { margin-top: 16px; }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="container">
+      <div class="topbar">
+        <div class="nav-pills">
+          <span class="pill active">Intro</span>
+          <span class="pill">Persona</span>
+          <span class="pill">Briefing</span>
+          <span class="pill">Store</span>
+          <span class="pill">Decision</span>
+          <span class="pill">Debrief</span>
+          <a href="https://forms.gle/placeholderURL" target="_blank" class="pill">Feedback</a>
+        </div>
+      </div>
+      <div class="brand">GoBag: <strong class="brand-white">Ready72</strong></div>
+      <div class="hr"></div>
+      <div class="layout">
+        <div class="card">
+          <h1>Ready72 — Learn to prepare for seventy-two hours</h1>
+          <p class="lead">This experience uses the Minimum Survival Standard. It shows how to plan and make good choices during an emergency.</p>
+          <div class="progress-wrap"><div class="progress"></div></div>
+          <ul class="bullets">
+            <li>You will see simple ideas first. You will add skills as you play.</li>
+            <li>Every item fits into a survival category like Water, Food, or Shelter.</li>
+            <li>Your choices change your speed, energy, and safety.</li>
+          </ul>
+          <div class="actions">
+            <button class="btn primary">Start</button>
+          </div>
+        </div>
+
+        <div class="card advisor">
+          <h3>HAZASSIST · SYSTEM ADVISOR</h3>
+          <div class="msg">Welcome to Ready72.</div>
+          <div class="msg">You will choose a profile and see a simple risk preview.</div>
+          <div class="msg">Balanced gear is better than carrying too much weight.</div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

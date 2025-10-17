@@ -1,5 +1,4 @@
 {
-  "rewrites": [
-    { "source": "/((?!api|assets|favicon\\.ico).*)", "destination": "/index.html" }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }

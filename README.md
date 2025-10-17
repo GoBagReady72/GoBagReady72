@@ -1,14 +1,19 @@
-# Ready72 — Wireframe Lab (Portable)
+# Ready72 — WF01 (Intro) Demo
 
-Purpose: portable, working, **behavior-first** harness for Scene1–5 + Debrief.
-- Vite + React + TS + Tailwind (neutral utilities only, no branding)
-- Carousel + Progress components for interaction testing
-- `/legacy/` includes your original bundle (verbatim) for reference
+This is a drop-in, static demo for **Wireframe 01 — Intro** with the canonical header/scene picker.
 
-## Deploy
-1) Upload all files to your repo root via GitHub web UI.
-2) Vercel will auto-build.
+- **Entry:** `index.html` (no build step required)
+- **Scope:** Single screen (Intro) + System Advisor
+- **Styles:** Inline CSS (no external dependencies)
+- **Feedback:** Update the `Feedback` link to your Google Form when ready
 
-## Next
-- Replace `src/scenes/*` with your canonical TSX when ready.
-- Use `src/components/*` for shared UI.
+## How to run locally
+Just open `index.html` in a browser. No tooling needed.
+
+## How to deploy to Vercel (static)
+- Create a new project from this repo.
+- Framework preset: **Other** (static).
+- No build command. Output directory is root (contains `index.html`).
+
+## Canonical header
+The header (scene pills + brand + Feedback) is the **standard** for all Ready72 screens.
