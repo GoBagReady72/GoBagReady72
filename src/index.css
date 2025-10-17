@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neutral util classes for wireframes */
+.wf-container { @apply max-w-6xl mx-auto px-4; }
+.wf-card { @apply border border-neutral-200 rounded-xl p-4; }
+.wf-grid-3 { @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3; }
+.wf-h1 { @apply text-xl font-semibold; }
+.wf-h2 { @apply text-lg font-semibold; }
+.wf-muted { @apply text-sm text-neutral-500; }

@@ -1,17 +1,14 @@
-# GoBag: Ready72 — Survival Simulator (MVP)
-**Powered by HazMSS360™**
+# Ready72 — Wireframe Lab (Portable)
 
-React + TypeScript + Vite scaffold with a 4‑hour decision loop, resource bars,
-and a deterministic screen flow: Title → Briefing → Store → Simulation → Debrief.
+Purpose: portable, working, **behavior-first** harness for Scene1–5 + Debrief.
+- Vite + React + TS + Tailwind (neutral utilities only, no branding)
+- Carousel + Progress components for interaction testing
+- `/legacy/` includes your original bundle (verbatim) for reference
 
-## Quick Start
-```bash
-npm install
-npm run dev
-```
+## Deploy
+1) Upload all files to your repo root via GitHub web UI.
+2) Vercel will auto-build.
 
-## What’s inside
-- `/src/routes/` — screens (Title, Briefing, Store, Simulation, Debrief)
-- `/src/components/` — ResourceBars, DecisionPanel, EventLog, PersonaCard
-- `/src/data/actions.json` — example actions
-
+## Next
+- Replace `src/scenes/*` with your canonical TSX when ready.
+- Use `src/components/*` for shared UI.

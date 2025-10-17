@@ -48,14 +48,18 @@ export default function Carousel({ items, visibleCount = 3, onChangeIndex }: Pro
   const slice = items.slice(start, end)
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: showArrows ? '40px 1fr 40px' : '1fr', gap: 8, alignItems: 'center' }}>
-      {showArrows && <button onClick={prev} aria-label="Previous" disabled={start === 0}>&lt;</button>}
-      <div ref={trackRef} style={{ display: 'grid', gridTemplateColumns: `repeat(${slice.length}, minmax(0,1fr))`, gap: 8 }}>
+    <div className="grid grid-cols-[40px_1fr_40px] items-center gap-2 md:gap-3">
+      {showArrows ? (
+        <button onClick={prev} aria-label="Previous" disabled={start === 0} className="p-2 rounded border disabled:opacity-40">{'<'}</button>
+      ) : <div />}
+      <div ref={trackRef} className="grid gap-2 md:gap-3" style={{ gridTemplateColumns: `repeat(${slice.length}, minmax(0,1fr))` }}>
         {slice.map(it => (
-          <div key={it.id} style={{ border: '1px solid #ddd', padding: 8, minHeight: 72 }}>{it.label}</div>
+          <div key={it.id} className="wf-card min-h-20">{it.label}</div>
         ))}
       </div>
-      {showArrows && <button onClick={next} aria-label="Next" disabled={end >= items.length}>&gt;</button>}
+      {showArrows ? (
+        <button onClick={next} aria-label="Next" disabled={end >= items.length} className="p-2 rounded border disabled:opacity-40">{'>'}</button>
+      ) : <div />}
     </div>
   )
 }
