@@ -1,7 +1,19 @@
-// App.tsx — GoBag: Ready72 IntroStart v0.7.3
-// Force the app to mount the v0.7.1 wireframe (or whichever file we patch below).
-import Ready72WireframesV071 from './Ready72WireframesV071';
+import { Link, Outlet } from 'react-router-dom'
 
 export default function App() {
-  return <Ready72WireframesV071 />;
+  return (
+    <div style={{fontFamily:'system-ui', padding:'16px'}}>
+      <h1>Ready72 — Sandbox</h1>
+      <p>Phase 2 skeleton. Mount legacy scenes into the routes below.</p>
+      <nav style={{display:'flex', gap:'12px', flexWrap:'wrap', marginBottom:'12px'}}>
+        <Link to="/scene1">Scene 1</Link>
+        <Link to="/scene2">Scene 2</Link>
+        <Link to="/scene3">Scene 3</Link>
+        <Link to="/scene4">Scene 4</Link>
+        <Link to="/scene5">Scene 5</Link>
+        <Link to="/debrief">Debrief</Link>
+      </nav>
+      <Outlet />
+    </div>
+  )
 }
