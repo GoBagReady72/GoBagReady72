@@ -5,11 +5,7 @@ import App from './App'
 import routes from './routes'
 
 const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <App />,
-    children: routes
-  }
+  { path: '/', element: <App />, children: routes }
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

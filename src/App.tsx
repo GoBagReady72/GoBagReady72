@@ -4,8 +4,6 @@ import { Suspense } from 'react'
 export default function App() {
   return (
     <div style={{ fontFamily: 'system-ui', padding: '16px' }}>
-      <h1>Ready72</h1>
-      <p>Phase 2 wireframe harness. Mount legacy scenes into the routes below.</p>
       <nav style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
         <Link to="/scene1">Scene 1</Link>
         <Link to="/scene2">Scene 2</Link>
@@ -14,7 +12,7 @@ export default function App() {
         <Link to="/scene5">Scene 5</Link>
         <Link to="/debrief">Debrief</Link>
       </nav>
-      <Suspense fallback={<div>Loading…</div>}>
+      <Suspense fallback={<div />}>
         <Outlet />
       </Suspense>
     </div>
