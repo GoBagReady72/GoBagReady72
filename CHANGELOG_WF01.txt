@@ -1,0 +1,15 @@
+Ready72 — Wireframe 1 (Scene 0 Intro) — deploy bundle
+Generated: 2025-10-17T09:19:15
+
+Guardrails:
+- Zero visual changes to your JSX; mounted via a TSX wrapper.
+- Included only minimal app skeleton (Vite + React + TS).
+- Route mounted at: /scene0
+
+Mount plan:
+- Original scene -> src/wf1/ready_72_scene_0_intro_pixel_rebuild.jsx
+- Route wrapper  -> src/scenes/Scene0Intro.tsx
+
+Run locally:
+  npm i && npm run dev
+  # Then open http://localhost:5173/scene0
